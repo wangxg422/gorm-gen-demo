@@ -18,23 +18,29 @@ import (
 var (
 	Q           = new(Query)
 	AppInstance *appInstance
+	AppPackage  *appPackage
 	Role        *role
 	User        *user
+	UserRole    *userRole
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	AppInstance = &Q.AppInstance
+	AppPackage = &Q.AppPackage
 	Role = &Q.Role
 	User = &Q.User
+	UserRole = &Q.UserRole
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:          db,
 		AppInstance: newAppInstance(db, opts...),
+		AppPackage:  newAppPackage(db, opts...),
 		Role:        newRole(db, opts...),
 		User:        newUser(db, opts...),
+		UserRole:    newUserRole(db, opts...),
 	}
 }
 
@@ -42,8 +48,10 @@ type Query struct {
 	db *gorm.DB
 
 	AppInstance appInstance
+	AppPackage  appPackage
 	Role        role
 	User        user
+	UserRole    userRole
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -52,8 +60,10 @@ func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
 		AppInstance: q.AppInstance.clone(db),
+		AppPackage:  q.AppPackage.clone(db),
 		Role:        q.Role.clone(db),
 		User:        q.User.clone(db),
+		UserRole:    q.UserRole.clone(db),
 	}
 }
 
@@ -69,22 +79,28 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
 		AppInstance: q.AppInstance.replaceDB(db),
+		AppPackage:  q.AppPackage.replaceDB(db),
 		Role:        q.Role.replaceDB(db),
 		User:        q.User.replaceDB(db),
+		UserRole:    q.UserRole.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
 	AppInstance IAppInstanceDo
+	AppPackage  IAppPackageDo
 	Role        IRoleDo
 	User        IUserDo
+	UserRole    IUserRoleDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		AppInstance: q.AppInstance.WithContext(ctx),
+		AppPackage:  q.AppPackage.WithContext(ctx),
 		Role:        q.Role.WithContext(ctx),
 		User:        q.User.WithContext(ctx),
+		UserRole:    q.UserRole.WithContext(ctx),
 	}
 }
 

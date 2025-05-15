@@ -29,9 +29,15 @@ func newAppInstance(db *gorm.DB, opts ...gen.DOOption) appInstance {
 	tableName := _appInstance.appInstanceDo.TableName()
 	_appInstance.ALL = field.NewAsterisk(tableName)
 	_appInstance.ID = field.NewInt64(tableName, "id")
+	_appInstance.AppID = field.NewString(tableName, "app_id")
 	_appInstance.AppName = field.NewString(tableName, "app_name")
-	_appInstance.CreateTime = field.NewTime(tableName, "create_time")
+	_appInstance.CreateUserID = field.NewInt64(tableName, "create_user_id")
 	_appInstance.Desc = field.NewString(tableName, "desc")
+	_appInstance.Status = field.NewInt32(tableName, "status")
+	_appInstance.Valid = field.NewString(tableName, "valid")
+	_appInstance.CreateTime = field.NewTime(tableName, "create_time")
+	_appInstance.UpdateTime = field.NewTime(tableName, "update_time")
+	_appInstance.DeleteTime = field.NewTime(tableName, "delete_time")
 	_appInstance.Remark = field.NewString(tableName, "remark")
 
 	_appInstance.fillFieldMap()
@@ -42,12 +48,18 @@ func newAppInstance(db *gorm.DB, opts ...gen.DOOption) appInstance {
 type appInstance struct {
 	appInstanceDo appInstanceDo
 
-	ALL        field.Asterisk
-	ID         field.Int64
-	AppName    field.String
-	CreateTime field.Time
-	Desc       field.String
-	Remark     field.String
+	ALL          field.Asterisk
+	ID           field.Int64
+	AppID        field.String // app实例id
+	AppName      field.String // app实例名称
+	CreateUserID field.Int64  // 创建用户
+	Desc         field.String // app描述
+	Status       field.Int32  // 0正常1停止
+	Valid        field.String // 0可用1已删除
+	CreateTime   field.Time
+	UpdateTime   field.Time
+	DeleteTime   field.Time
+	Remark       field.String // 备注
 
 	fieldMap map[string]field.Expr
 }
@@ -65,9 +77,15 @@ func (a appInstance) As(alias string) *appInstance {
 func (a *appInstance) updateTableName(table string) *appInstance {
 	a.ALL = field.NewAsterisk(table)
 	a.ID = field.NewInt64(table, "id")
+	a.AppID = field.NewString(table, "app_id")
 	a.AppName = field.NewString(table, "app_name")
-	a.CreateTime = field.NewTime(table, "create_time")
+	a.CreateUserID = field.NewInt64(table, "create_user_id")
 	a.Desc = field.NewString(table, "desc")
+	a.Status = field.NewInt32(table, "status")
+	a.Valid = field.NewString(table, "valid")
+	a.CreateTime = field.NewTime(table, "create_time")
+	a.UpdateTime = field.NewTime(table, "update_time")
+	a.DeleteTime = field.NewTime(table, "delete_time")
 	a.Remark = field.NewString(table, "remark")
 
 	a.fillFieldMap()
@@ -95,11 +113,17 @@ func (a *appInstance) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *appInstance) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 5)
+	a.fieldMap = make(map[string]field.Expr, 11)
 	a.fieldMap["id"] = a.ID
+	a.fieldMap["app_id"] = a.AppID
 	a.fieldMap["app_name"] = a.AppName
-	a.fieldMap["create_time"] = a.CreateTime
+	a.fieldMap["create_user_id"] = a.CreateUserID
 	a.fieldMap["desc"] = a.Desc
+	a.fieldMap["status"] = a.Status
+	a.fieldMap["valid"] = a.Valid
+	a.fieldMap["create_time"] = a.CreateTime
+	a.fieldMap["update_time"] = a.UpdateTime
+	a.fieldMap["delete_time"] = a.DeleteTime
 	a.fieldMap["remark"] = a.Remark
 }
 

@@ -16,10 +16,9 @@ func TestUserCRUD(t *testing.T) {
 
 	username := "u" + strconv.FormatInt(time.Now().UnixMilli(), 13)
 	user := model.User {
-		Username: username,
+		UserName: username,
 		Password: "123456",
 		Status: 1,
-		Remark: "test",
 	}
 
 	err := CreateUser(&user)
@@ -29,10 +28,10 @@ func TestUserCRUD(t *testing.T) {
 
 	FindUser, err := GetUserByUserID(user.ID)
 	assert.NoError(t, err)
-	assert.Equal(t, username, FindUser.Username)
+	assert.Equal(t, username, FindUser.UserName)
 
 	newUser := model.User {
-		Username: "new_" + username,
+		UserName: "new_" + username,
 	}
 
 	var one int64 = 1
