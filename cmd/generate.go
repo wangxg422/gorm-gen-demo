@@ -30,15 +30,17 @@ func main() {
 	g.UseDB(client.ConnectDB()) // reuse your gorm db
 
 	// 先定义模型的基础结构，只生成基础字段，不处理关系，确保模型都先存在，避免定义关系时循环引用冲突
+	AppPackage := g.GenerateModel("app_package")
 	AppInstance := g.GenerateModel("app_instance")
 	Role := g.GenerateModel("role")
 	User := g.GenerateModel("user")
 
+	// 这里需要先生成模型，在定义完关系后在生成模型会被覆盖
 	g.ApplyBasic(g.GenerateAllTable()...)
 
 	// 使用 ApplyBasic 后，单独追加关联（使用 ApplyInterface 或 GenerateModel 的补充模式）
 
-	// 给 User 追加关系
+	// 定义 User 的关系
 	UserRelate := g.GenerateModelAs("user", "User",
 		gen.FieldRelate(field.HasMany, "AppInstances", AppInstance, &field.RelateConfig{
 			GORMTag: field.GormTag{
@@ -54,16 +56,7 @@ func main() {
 		}),
 	)
 
-	// 给 AppInstance 追加关系
-	AppInstanceRelate := g.GenerateModelAs("app_instance", "AppInstance",
-		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
-			GORMTag: field.GormTag{
-				"foreignKey": []string{"create_user_id"},
-			},
-		}),
-	)
-
-	// 给 Role 追加关系
+	// 定义 Role 的关系
 	RoleRelate := g.GenerateModelAs("role", "Role",
 		gen.FieldRelate(field.Many2Many, "Users", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
@@ -74,9 +67,32 @@ func main() {
 		}),
 	)
 
+	// 定义 AppPackage 的关系
+	AppPackageRelate := g.GenerateModelAs("app_package", "AppPackage",
+		gen.FieldRelate(field.HasMany, "AppInstance", AppInstance, &field.RelateConfig{
+			GORMTag: field.GormTag{
+				"foreignKey": []string{"app_package_id"},
+			},
+		}),
+	)
+
+	// 定义 AppInstance 的关系
+	AppInstanceRelate := g.GenerateModelAs("app_instance", "AppInstance",
+		gen.FieldRelate(field.BelongsTo, "CreateUserID", User, &field.RelateConfig{
+			GORMTag: field.GormTag{
+				"foreignKey": []string{"create_user_id"},
+			},
+		}),
+		gen.FieldRelate(field.BelongsTo, "AppPackageID", AppPackage, &field.RelateConfig{
+			GORMTag: field.GormTag{
+				"foreignKey": []string{"app_package_id"},
+			},
+		}),
+	)
+
 	// Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`
 	//g.ApplyInterface(func(Querier){}, model.User{}, model.Company{})
-	g.ApplyBasic(UserRelate, AppInstanceRelate, RoleRelate)
+	g.ApplyBasic(UserRelate, RoleRelate, AppPackageRelate, AppInstanceRelate, )
 
 	// Generate the code
 	g.Execute()
