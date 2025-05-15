@@ -8,11 +8,13 @@ const TableNameUser = "user"
 
 // User mapped from table <user>
 type User struct {
-	ID       int64  `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	Username string `gorm:"column:username" json:"username"`
-	Password string `gorm:"column:password" json:"password"`
-	Status   int32  `gorm:"column:status" json:"status"`
-	Remark   string `gorm:"column:remark" json:"remark"`
+	ID           int64         `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+	Username     string        `gorm:"column:username" json:"username"`
+	Password     string        `gorm:"column:password" json:"password"`
+	Status       int32         `gorm:"column:status" json:"status"`
+	Remark       string        `gorm:"column:remark" json:"remark"`
+	AppInstances []AppInstance `gorm:"foreignKey:create_user_id" json:"app_instances"`
+	Roles        []Role        `gorm:"JoinReferences:RoleID;joinForeignKey:UserID;many2many:user_role" json:"roles"`
 }
 
 // TableName User's table name

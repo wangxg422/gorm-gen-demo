@@ -8,18 +8,19 @@ import (
 	"time"
 )
 
-const TableNameApp = "app"
+const TableNameAppInstance = "app_instance"
 
-// App mapped from table <app>
-type App struct {
+// AppInstance mapped from table <app_instance>
+type AppInstance struct {
 	ID         int64     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	AppName    string    `gorm:"column:app_name" json:"app_name"`
 	CreateTime time.Time `gorm:"column:create_time" json:"create_time"`
 	Desc       string    `gorm:"column:desc" json:"desc"`
 	Remark     string    `gorm:"column:remark" json:"remark"`
+	CreateUser User      `gorm:"foreignKey:create_user_id" json:"create_user"`
 }
 
-// TableName App's table name
-func (*App) TableName() string {
-	return TableNameApp
+// TableName AppInstance's table name
+func (*AppInstance) TableName() string {
+	return TableNameAppInstance
 }

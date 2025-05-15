@@ -1,14 +1,14 @@
 package main
 
 import (
-	"gorm-gen-demo/dal"
+	"gorm-gen-demo/client"
 	"gorm-gen-demo/dal/query"
 )
 
 func init() {
-	dal.DB = dal.ConnectDB().Debug()
+	client.DB = client.ConnectDB().Debug()
 }
 
 func main() {
-	query.SetDefault(dal.DB)
+	query.SetDefault(client.DB)
 }

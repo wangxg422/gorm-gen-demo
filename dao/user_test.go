@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"gorm-gen-demo/dal"
+	"gorm-gen-demo/client"
 	"gorm-gen-demo/dal/model"
 	"gorm-gen-demo/dal/query"
 	"strconv"
@@ -12,7 +12,7 @@ import (
 )
 
 func TestUserCRUD(t *testing.T) {
-	query.SetDefault(dal.ConnectDB().Debug())
+	query.SetDefault(client.ConnectDB().Debug())
 
 	username := "u" + strconv.FormatInt(time.Now().UnixMilli(), 13)
 	user := model.User {

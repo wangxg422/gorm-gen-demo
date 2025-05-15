@@ -12,6 +12,7 @@ type Role struct {
 	RoleCode string `gorm:"column:role_code" json:"role_code"`
 	RoleName string `gorm:"column:role_name" json:"role_name"`
 	Status   int32  `gorm:"column:status" json:"status"`
+	Users    []User `gorm:"JoinReferences:UserID;joinForeignKey:RoleID;many2many:user_role" json:"users"`
 }
 
 // TableName Role's table name

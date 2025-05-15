@@ -1,4 +1,4 @@
-package dal
+package client
 
 import (
 	"fmt"

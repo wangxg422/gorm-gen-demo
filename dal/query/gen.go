@@ -16,54 +16,44 @@ import (
 )
 
 var (
-	Q          = new(Query)
-	App        *app
-	AppPackage *appPackage
-	Role       *role
-	User       *user
-	UserRole   *userRole
+	Q           = new(Query)
+	AppInstance *appInstance
+	Role        *role
+	User        *user
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
-	App = &Q.App
-	AppPackage = &Q.AppPackage
+	AppInstance = &Q.AppInstance
 	Role = &Q.Role
 	User = &Q.User
-	UserRole = &Q.UserRole
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:         db,
-		App:        newApp(db, opts...),
-		AppPackage: newAppPackage(db, opts...),
-		Role:       newRole(db, opts...),
-		User:       newUser(db, opts...),
-		UserRole:   newUserRole(db, opts...),
+		db:          db,
+		AppInstance: newAppInstance(db, opts...),
+		Role:        newRole(db, opts...),
+		User:        newUser(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	App        app
-	AppPackage appPackage
-	Role       role
-	User       user
-	UserRole   userRole
+	AppInstance appInstance
+	Role        role
+	User        user
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		App:        q.App.clone(db),
-		AppPackage: q.AppPackage.clone(db),
-		Role:       q.Role.clone(db),
-		User:       q.User.clone(db),
-		UserRole:   q.UserRole.clone(db),
+		db:          db,
+		AppInstance: q.AppInstance.clone(db),
+		Role:        q.Role.clone(db),
+		User:        q.User.clone(db),
 	}
 }
 
@@ -77,30 +67,24 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		App:        q.App.replaceDB(db),
-		AppPackage: q.AppPackage.replaceDB(db),
-		Role:       q.Role.replaceDB(db),
-		User:       q.User.replaceDB(db),
-		UserRole:   q.UserRole.replaceDB(db),
+		db:          db,
+		AppInstance: q.AppInstance.replaceDB(db),
+		Role:        q.Role.replaceDB(db),
+		User:        q.User.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	App        IAppDo
-	AppPackage IAppPackageDo
-	Role       IRoleDo
-	User       IUserDo
-	UserRole   IUserRoleDo
+	AppInstance IAppInstanceDo
+	Role        IRoleDo
+	User        IUserDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		App:        q.App.WithContext(ctx),
-		AppPackage: q.AppPackage.WithContext(ctx),
-		Role:       q.Role.WithContext(ctx),
-		User:       q.User.WithContext(ctx),
-		UserRole:   q.UserRole.WithContext(ctx),
+		AppInstance: q.AppInstance.WithContext(ctx),
+		Role:        q.Role.WithContext(ctx),
+		User:        q.User.WithContext(ctx),
 	}
 }
 
