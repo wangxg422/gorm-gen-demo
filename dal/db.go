@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const MySQLDSN = "root:XishangAdmin@tcp(10.66.66.66:13307)/gorm_gen?charset=utf8mb4&parseTime=True"
+const MySQLDSN = "root:Fast1899fast@tcp(127.0.0.1:3306)/gorm_gen?charset=utf8mb4&parseTime=True"
 
 var DB *gorm.DB
 

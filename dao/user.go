@@ -13,15 +13,15 @@ func CreateUser(user *model.User) error {
 }
 
 func UpdateUser(user *model.User) (gen.ResultInfo, error) {
-	return query.User.WithContext(context.Background()).Where(query.User.UserID.Eq(user.UserID)).Updates(user);
+	return query.User.WithContext(context.Background()).Where(query.User.ID.Eq(user.ID)).Updates(user);
 }
 
-func DeleteUser(userID string) (gen.ResultInfo, error) {
-	return query.User.WithContext(context.Background()).Where(query.User.UserID.Eq(userID)).Delete();
+func DeleteUser(id int64) (gen.ResultInfo, error) {
+	return query.User.WithContext(context.Background()).Where(query.User.ID.Eq(id)).Delete();
 }
 
-func GetUserByUserID(userID string) (*model.User, error) {
-	user, err := query.User.WithContext(context.Background()).Where(query.User.UserID.Eq(userID)).First()
+func GetUserByUserID(id int64) (*model.User, error) {
+	user, err := query.User.WithContext(context.Background()).Where(query.User.ID.Eq(id)).First()
 	if err != nil {
 		return nil, err
 	}

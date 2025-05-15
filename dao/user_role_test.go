@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFindRolesByUserId(t *testing.T) {
+func TestGetUserWithRoles(t *testing.T) {
 	query.SetDefault(dal.ConnectDB().Debug())
 
 	var data = make([]map[string]any, 0)
-	err := FindRolesOfUser(&data)
+	err := GetUserWithRoles(&data)
 	assert.NoError(t, err)
 }

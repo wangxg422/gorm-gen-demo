@@ -8,8 +8,10 @@ import (
 
 type R map[any]any
 
-func FindRolesOfUser(data interface{}) error {
+func GetUserWithRoles(data interface{}) error {
+	ur := query.UserRole.As("ur")
+
 	return query.User.WithContext(context.Background()).
-		LeftJoin(query.UserRole, query.User.ID.EqCol(query.Role.ID)).
-		LeftJoin(query.UserRole, query.UserRole.RoleID.EqCol(query.Role.ID)).Scan(data)
+		LeftJoin(ur, query.User.ID.EqCol(query.Role.ID)).
+		LeftJoin(ur, query.UserRole.RoleID.EqCol(query.Role.ID)).Scan(data)
 }

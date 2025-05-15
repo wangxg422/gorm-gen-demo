@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"gorm-gen-demo/dal"
 	"gorm-gen-demo/dal/model"
 	"gorm-gen-demo/dal/query"
@@ -15,10 +14,9 @@ import (
 func TestUserCRUD(t *testing.T) {
 	query.SetDefault(dal.ConnectDB().Debug())
 
-	userId := "u" + strconv.FormatInt(time.Now().UnixMilli(), 13)
+	username := "u" + strconv.FormatInt(time.Now().UnixMilli(), 13)
 	user := model.User {
-		UserID: userId,
-		Username: "test",
+		Username: username,
 		Password: "123456",
 		Status: 1,
 		Remark: "test",
@@ -26,27 +24,25 @@ func TestUserCRUD(t *testing.T) {
 
 	err := CreateUser(&user)
 	assert.NoError(t, err)
-	assert.Equal(t, userId, user.UserID)
+	assert.Equal(t, username, user)
+	assert.Greater(t, user.ID, 0)
 
-	FindUser, err := GetUserByUserID(user.UserID)
+	FindUser, err := GetUserByUserID(user.ID)
 	assert.NoError(t, err)
-	assert.Equal(t, user.UserID, FindUser.UserID)
+	assert.Equal(t, username, FindUser.Username)
 
 	newUser := model.User {
-		UserID: userId,
-		Username: "new_username",
+		Username: "new_" + username,
 	}
 
 	var one int64 = 1
 
 	r, err := UpdateUser(&newUser)
 	assert.NoError(t, err)
-	assert.Equal(t,"new_username", newUser.Username)
-	fmt.Println(r.RowsAffected)
 	assert.Equal(t, one, r.RowsAffected)
 	assert.NoError(t, r.Error)
 
-	r, err = DeleteUser(user.UserID)
+	r, err = DeleteUser(user.ID)
 	assert.NoError(t, err)
 	assert.Equal(t, one, r.RowsAffected)
 	assert.NoError(t, r.Error)
