@@ -23,7 +23,6 @@ type AppInstance struct {
 	UpdateTime   *time.Time `gorm:"column:update_time" json:"update_time"`
 	DeleteTime   *time.Time `gorm:"column:delete_time" json:"delete_time"`
 	Remark       *string    `gorm:"column:remark;comment:备注" json:"remark"` // 备注
-	CreateUser   User       `gorm:"foreignKey:create_user_id" json:"create_user"`
 }
 
 // TableName AppInstance's table name

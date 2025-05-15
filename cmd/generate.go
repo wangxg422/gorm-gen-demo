@@ -29,9 +29,6 @@ func main() {
 	//gormdb, _ := gorm.Open(mysql.Open("root:passowrd@(127.0.0.1:3306)/gorm_gen?charset=utf8mb4&parseTime=True&loc=Local"))
 	g.UseDB(client.ConnectDB()) // reuse your gorm db
 
-	// Generate basic type-safe DAO API for struct `model.User` following conventions
-	//g.ApplyBasic(model.User{})
-
 	// 先定义模型的基础结构，只生成基础字段，不处理关系，确保模型都先存在，避免定义关系时循环引用冲突
 	AppInstance := g.GenerateModel("app_instance")
 	Role := g.GenerateModel("role")
