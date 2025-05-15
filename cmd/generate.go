@@ -42,16 +42,21 @@ func main() {
 
 	// 定义 User 的关系
 	UserRelate := g.GenerateModelAs("user", "User",
-		gen.FieldRelate(field.HasMany, "AppInstances", AppInstance, &field.RelateConfig{
-			GORMTag: field.GormTag{
-				"foreignKey": []string{"create_user_id"},
-			},
-		}),
 		gen.FieldRelate(field.Many2Many, "Roles", Role, &field.RelateConfig{
 			GORMTag: field.GormTag{
 				"many2many":      []string{"user_role"},
 				"joinForeignKey": []string{"UserID"},
 				"JoinReferences": []string{"RoleID"},
+			},
+		}),
+		gen.FieldRelate(field.HasMany, "AppInstances", AppInstance, &field.RelateConfig{
+			GORMTag: field.GormTag{
+				"foreignKey": []string{"CreateUserID"},
+			},
+		}),
+		gen.FieldRelate(field.HasMany, "AppPackages", AppPackage, &field.RelateConfig{
+			GORMTag: field.GormTag{
+				"foreignKey": []string{"CreateUserID"},
 			},
 		}),
 	)
@@ -71,28 +76,33 @@ func main() {
 	AppPackageRelate := g.GenerateModelAs("app_package", "AppPackage",
 		gen.FieldRelate(field.HasMany, "AppInstance", AppInstance, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"app_package_id"},
+				"foreignKey": []string{"AppPackageID"},
+			},
+		}),
+		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
+			GORMTag: field.GormTag{
+				"foreignKey": []string{"CreateUserID"},
 			},
 		}),
 	)
 
 	// 定义 AppInstance 的关系
 	AppInstanceRelate := g.GenerateModelAs("app_instance", "AppInstance",
-		gen.FieldRelate(field.BelongsTo, "CreateUserID", User, &field.RelateConfig{
+		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"create_user_id"},
+				"foreignKey": []string{"CreateUserID"},
 			},
 		}),
-		gen.FieldRelate(field.BelongsTo, "AppPackageID", AppPackage, &field.RelateConfig{
+		gen.FieldRelate(field.BelongsTo, "AppPackage", AppPackage, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"app_package_id"},
+				"foreignKey": []string{"AppPackageID"},
 			},
 		}),
 	)
 
 	// Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`
 	//g.ApplyInterface(func(Querier){}, model.User{}, model.Company{})
-	g.ApplyBasic(UserRelate, RoleRelate, AppPackageRelate, AppInstanceRelate, )
+	g.ApplyBasic(UserRelate, RoleRelate, AppPackageRelate, AppInstanceRelate)
 
 	// Generate the code
 	g.Execute()

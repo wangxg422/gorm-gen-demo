@@ -13,16 +13,19 @@ const TableNameAppInstance = "app_instance"
 // AppInstance mapped from table <app_instance>
 type AppInstance struct {
 	ID           int64      `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	AppID        string     `gorm:"column:app_id;not null;default:0;comment:app实例id" json:"app_id"`    // app实例id
-	AppName      string     `gorm:"column:app_name;not null;comment:app实例名称" json:"app_name"`          // app实例名称
-	CreateUserID int64      `gorm:"column:create_user_id;not null;comment:创建用户" json:"create_user_id"` // 创建用户
-	Desc         *string    `gorm:"column:desc;comment:app描述" json:"desc"`                             // app描述
-	Status       int32      `gorm:"column:status;not null;comment:0正常1停止" json:"status"`               // 0正常1停止
-	Valid        string     `gorm:"column:valid;not null;default:0;comment:0可用1已删除" json:"valid"`      // 0可用1已删除
+	AppID        string     `gorm:"column:app_id;not null;default:0;comment:app实例id" json:"app_id"`     // app实例id
+	AppPackageID int64      `gorm:"column:app_package_id;not null;comment:安装包id" json:"app_package_id"` // 安装包id
+	AppName      string     `gorm:"column:app_name;not null;comment:app实例名称" json:"app_name"`           // app实例名称
+	CreateUserID int64      `gorm:"column:create_user_id;not null;comment:创建用户" json:"create_user_id"`  // 创建用户
+	Desc         *string    `gorm:"column:desc;comment:app描述" json:"desc"`                              // app描述
+	Status       int32      `gorm:"column:status;not null;comment:0正常1停止" json:"status"`                // 0正常1停止
+	Valid        string     `gorm:"column:valid;not null;default:0;comment:0可用1已删除" json:"valid"`       // 0可用1已删除
 	CreateTime   *time.Time `gorm:"column:create_time" json:"create_time"`
 	UpdateTime   *time.Time `gorm:"column:update_time" json:"update_time"`
 	DeleteTime   *time.Time `gorm:"column:delete_time" json:"delete_time"`
 	Remark       *string    `gorm:"column:remark;comment:备注" json:"remark"` // 备注
+	CreateUser   User       `gorm:"foreignKey:CreateUserID" json:"create_user"`
+	AppPackage   AppPackage `gorm:"foreignKey:AppPackageID" json:"app_package"`
 }
 
 // TableName AppInstance's table name

@@ -30,6 +30,7 @@ func newAppInstance(db *gorm.DB, opts ...gen.DOOption) appInstance {
 	_appInstance.ALL = field.NewAsterisk(tableName)
 	_appInstance.ID = field.NewInt64(tableName, "id")
 	_appInstance.AppID = field.NewString(tableName, "app_id")
+	_appInstance.AppPackageID = field.NewInt64(tableName, "app_package_id")
 	_appInstance.AppName = field.NewString(tableName, "app_name")
 	_appInstance.CreateUserID = field.NewInt64(tableName, "create_user_id")
 	_appInstance.Desc = field.NewString(tableName, "desc")
@@ -51,6 +52,7 @@ type appInstance struct {
 	ALL          field.Asterisk
 	ID           field.Int64
 	AppID        field.String // app实例id
+	AppPackageID field.Int64  // 安装包id
 	AppName      field.String // app实例名称
 	CreateUserID field.Int64  // 创建用户
 	Desc         field.String // app描述
@@ -78,6 +80,7 @@ func (a *appInstance) updateTableName(table string) *appInstance {
 	a.ALL = field.NewAsterisk(table)
 	a.ID = field.NewInt64(table, "id")
 	a.AppID = field.NewString(table, "app_id")
+	a.AppPackageID = field.NewInt64(table, "app_package_id")
 	a.AppName = field.NewString(table, "app_name")
 	a.CreateUserID = field.NewInt64(table, "create_user_id")
 	a.Desc = field.NewString(table, "desc")
@@ -113,9 +116,10 @@ func (a *appInstance) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *appInstance) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 11)
+	a.fieldMap = make(map[string]field.Expr, 12)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["app_id"] = a.AppID
+	a.fieldMap["app_package_id"] = a.AppPackageID
 	a.fieldMap["app_name"] = a.AppName
 	a.fieldMap["create_user_id"] = a.CreateUserID
 	a.fieldMap["desc"] = a.Desc
