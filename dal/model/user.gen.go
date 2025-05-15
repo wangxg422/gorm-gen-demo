@@ -18,9 +18,9 @@ type User struct {
 	Password     string        `gorm:"column:password;not null;comment:密码" json:"password"`          // 密码
 	Valid        string        `gorm:"column:valid;not null;default:0;comment:0可用1已删除" json:"valid"` // 0可用1已删除
 	Status       int32         `gorm:"column:status;not null;comment:0正常1停用" json:"status"`          // 0正常1停用
-	CreateTime   *time.Time    `gorm:"column:create_time" json:"create_time"`
-	UpdateTime   *time.Time    `gorm:"column:update_time" json:"update_time"`
-	DeleteTime   *time.Time    `gorm:"column:delete_time" json:"delete_time"`
+	CreateTime   *time.Time    `gorm:"column:create_time;autoCreateTime:true" json:"create_time"`
+	UpdateTime   *time.Time    `gorm:"column:update_time;autoUpdateTime:true" json:"update_time"`
+	DeleteTime   *time.Time    `gorm:"column:delete_time;autoDeleteTime:true" json:"delete_time"`
 	Remark       *string       `gorm:"column:remark" json:"remark"`
 	Roles        []Role        `gorm:"JoinReferences:RoleID;joinForeignKey:UserID;many2many:user_role" json:"roles"`
 	AppInstances []AppInstance `gorm:"foreignKey:CreateUserID" json:"app_instances"`

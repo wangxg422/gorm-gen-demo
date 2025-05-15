@@ -17,9 +17,9 @@ type Role struct {
 	RoleName   string     `gorm:"column:role_name;not null;comment:角色名称" json:"role_name"`      // 角色名称
 	Valid      string     `gorm:"column:valid;not null;default:0;comment:0可用1已删除" json:"valid"` // 0可用1已删除
 	Status     int32      `gorm:"column:status;not null;comment:0可用1停用" json:"status"`          // 0可用1停用
-	CreateTime *time.Time `gorm:"column:create_time" json:"create_time"`
-	UpdateTime *time.Time `gorm:"column:update_time" json:"update_time"`
-	DeleteTime *time.Time `gorm:"column:delete_time" json:"delete_time"`
+	CreateTime *time.Time `gorm:"column:create_time;autoCreateTime:true" json:"create_time"`
+	UpdateTime *time.Time `gorm:"column:update_time;autoUpdateTime:true" json:"update_time"`
+	DeleteTime *time.Time `gorm:"column:delete_time;autoDeleteTime:true" json:"delete_time"`
 	Remark     *string    `gorm:"column:remark" json:"remark"`
 	Users      []User     `gorm:"JoinReferences:UserID;joinForeignKey:RoleID;many2many:user_role" json:"users"`
 }

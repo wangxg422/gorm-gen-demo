@@ -20,9 +20,9 @@ type AppPackage struct {
 	CreateUserID   int64         `gorm:"column:create_user_id;not null;comment:创建用户" json:"create_user_id"`    // 创建用户
 	Status         int32         `gorm:"column:status;not null;comment:0可用1禁用" json:"status"`                  // 0可用1禁用
 	Valid          string        `gorm:"column:valid;not null;default:0;comment:0可用1已删除" json:"valid"`         // 0可用1已删除
-	CreateTime     *time.Time    `gorm:"column:create_time" json:"create_time"`
-	UpdateTime     *time.Time    `gorm:"column:update_time" json:"update_time"`
-	DeleteTime     *time.Time    `gorm:"column:delete_time" json:"delete_time"`
+	CreateTime     *time.Time    `gorm:"column:create_time;autoCreateTime:true" json:"create_time"`
+	UpdateTime     *time.Time    `gorm:"column:update_time;autoUpdateTime:true" json:"update_time"`
+	DeleteTime     *time.Time    `gorm:"column:delete_time;autoDeleteTime:true" json:"delete_time"`
 	Remark         *string       `gorm:"column:remark;comment:备注" json:"remark"` // 备注
 	AppInstance    []AppInstance `gorm:"foreignKey:AppPackageID" json:"app_instance"`
 	CreateUser     User          `gorm:"foreignKey:CreateUserID" json:"create_user"`
