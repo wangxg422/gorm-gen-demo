@@ -35,7 +35,7 @@ func newAppInstance(db *gorm.DB, opts ...gen.DOOption) appInstance {
 	_appInstance.CreateUserID = field.NewInt64(tableName, "create_user_id")
 	_appInstance.Desc = field.NewString(tableName, "desc")
 	_appInstance.Status = field.NewInt32(tableName, "status")
-	_appInstance.Valid = field.NewString(tableName, "valid")
+	_appInstance.DelFlag = field.NewString(tableName, "del_flag")
 	_appInstance.CreateTime = field.NewTime(tableName, "create_time")
 	_appInstance.UpdateTime = field.NewTime(tableName, "update_time")
 	_appInstance.DeleteTime = field.NewTime(tableName, "delete_time")
@@ -57,7 +57,7 @@ type appInstance struct {
 	CreateUserID field.Int64  // 创建用户
 	Desc         field.String // app描述
 	Status       field.Int32  // 0正常1停止
-	Valid        field.String // 0可用1已删除
+	DelFlag      field.String // 0可用1已删除
 	CreateTime   field.Time
 	UpdateTime   field.Time
 	DeleteTime   field.Time
@@ -85,7 +85,7 @@ func (a *appInstance) updateTableName(table string) *appInstance {
 	a.CreateUserID = field.NewInt64(table, "create_user_id")
 	a.Desc = field.NewString(table, "desc")
 	a.Status = field.NewInt32(table, "status")
-	a.Valid = field.NewString(table, "valid")
+	a.DelFlag = field.NewString(table, "del_flag")
 	a.CreateTime = field.NewTime(table, "create_time")
 	a.UpdateTime = field.NewTime(table, "update_time")
 	a.DeleteTime = field.NewTime(table, "delete_time")
@@ -124,7 +124,7 @@ func (a *appInstance) fillFieldMap() {
 	a.fieldMap["create_user_id"] = a.CreateUserID
 	a.fieldMap["desc"] = a.Desc
 	a.fieldMap["status"] = a.Status
-	a.fieldMap["valid"] = a.Valid
+	a.fieldMap["del_flag"] = a.DelFlag
 	a.fieldMap["create_time"] = a.CreateTime
 	a.fieldMap["update_time"] = a.UpdateTime
 	a.fieldMap["delete_time"] = a.DeleteTime

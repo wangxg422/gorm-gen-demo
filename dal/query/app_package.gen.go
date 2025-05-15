@@ -35,7 +35,7 @@ func newAppPackage(db *gorm.DB, opts ...gen.DOOption) appPackage {
 	_appPackage.PackageVersion = field.NewString(tableName, "package_version")
 	_appPackage.CreateUserID = field.NewInt64(tableName, "create_user_id")
 	_appPackage.Status = field.NewInt32(tableName, "status")
-	_appPackage.Valid = field.NewString(tableName, "valid")
+	_appPackage.DelFlag = field.NewString(tableName, "del_flag")
 	_appPackage.CreateTime = field.NewTime(tableName, "create_time")
 	_appPackage.UpdateTime = field.NewTime(tableName, "update_time")
 	_appPackage.DeleteTime = field.NewTime(tableName, "delete_time")
@@ -57,7 +57,7 @@ type appPackage struct {
 	PackageVersion field.String // 应用包版本
 	CreateUserID   field.Int64  // 创建用户
 	Status         field.Int32  // 0可用1禁用
-	Valid          field.String // 0可用1已删除
+	DelFlag        field.String // 0可用1已删除
 	CreateTime     field.Time
 	UpdateTime     field.Time
 	DeleteTime     field.Time
@@ -85,7 +85,7 @@ func (a *appPackage) updateTableName(table string) *appPackage {
 	a.PackageVersion = field.NewString(table, "package_version")
 	a.CreateUserID = field.NewInt64(table, "create_user_id")
 	a.Status = field.NewInt32(table, "status")
-	a.Valid = field.NewString(table, "valid")
+	a.DelFlag = field.NewString(table, "del_flag")
 	a.CreateTime = field.NewTime(table, "create_time")
 	a.UpdateTime = field.NewTime(table, "update_time")
 	a.DeleteTime = field.NewTime(table, "delete_time")
@@ -124,7 +124,7 @@ func (a *appPackage) fillFieldMap() {
 	a.fieldMap["package_version"] = a.PackageVersion
 	a.fieldMap["create_user_id"] = a.CreateUserID
 	a.fieldMap["status"] = a.Status
-	a.fieldMap["valid"] = a.Valid
+	a.fieldMap["del_flag"] = a.DelFlag
 	a.fieldMap["create_time"] = a.CreateTime
 	a.fieldMap["update_time"] = a.UpdateTime
 	a.fieldMap["delete_time"] = a.DeleteTime

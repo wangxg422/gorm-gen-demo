@@ -32,7 +32,7 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.UserName = field.NewString(tableName, "user_name")
 	_user.RealName = field.NewString(tableName, "real_name")
 	_user.Password = field.NewString(tableName, "password")
-	_user.Valid = field.NewString(tableName, "valid")
+	_user.DelFlag = field.NewString(tableName, "del_flag")
 	_user.Status = field.NewInt32(tableName, "status")
 	_user.CreateTime = field.NewTime(tableName, "create_time")
 	_user.UpdateTime = field.NewTime(tableName, "update_time")
@@ -52,7 +52,7 @@ type user struct {
 	UserName   field.String // 用户名
 	RealName   field.String // 姓名
 	Password   field.String // 密码
-	Valid      field.String // 0可用1已删除
+	DelFlag    field.String // 0可用1已删除
 	Status     field.Int32  // 0正常1停用
 	CreateTime field.Time
 	UpdateTime field.Time
@@ -78,7 +78,7 @@ func (u *user) updateTableName(table string) *user {
 	u.UserName = field.NewString(table, "user_name")
 	u.RealName = field.NewString(table, "real_name")
 	u.Password = field.NewString(table, "password")
-	u.Valid = field.NewString(table, "valid")
+	u.DelFlag = field.NewString(table, "del_flag")
 	u.Status = field.NewInt32(table, "status")
 	u.CreateTime = field.NewTime(table, "create_time")
 	u.UpdateTime = field.NewTime(table, "update_time")
@@ -113,7 +113,7 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["user_name"] = u.UserName
 	u.fieldMap["real_name"] = u.RealName
 	u.fieldMap["password"] = u.Password
-	u.fieldMap["valid"] = u.Valid
+	u.fieldMap["del_flag"] = u.DelFlag
 	u.fieldMap["status"] = u.Status
 	u.fieldMap["create_time"] = u.CreateTime
 	u.fieldMap["update_time"] = u.UpdateTime

@@ -15,14 +15,14 @@ const TableNameUser = "user"
 // User mapped from table <user>
 type User struct {
 	ID           int64                 `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	UserName     string                `gorm:"column:user_name;not null;comment:用户名" json:"user_name"`                       // 用户名
-	RealName     string                `gorm:"column:real_name;not null;comment:姓名" json:"real_name"`                        // 姓名
-	Password     string                `gorm:"column:password;not null;comment:密码" json:"password"`                          // 密码
-	Valid        soft_delete.DeletedAt `gorm:"column:valid;not null;default:0;comment:0可用1已删除;softDelete:flag" json:"valid"` // 0可用1已删除
-	Status       int32                 `gorm:"column:status;not null;comment:0正常1停用" json:"status"`                          // 0正常1停用
+	UserName     string                `gorm:"column:user_name;not null;comment:用户名" json:"user_name"`                             // 用户名
+	RealName     string                `gorm:"column:real_name;not null;comment:姓名" json:"real_name"`                              // 姓名
+	Password     string                `gorm:"column:password;not null;comment:密码" json:"password"`                                // 密码
+	DelFlag      soft_delete.DeletedAt `gorm:"column:del_flag;not null;default:0;comment:0可用1已删除;softDelete:flag" json:"del_flag"` // 0可用1已删除
+	Status       int32                 `gorm:"column:status;not null;comment:0正常1停用" json:"status"`                                // 0正常1停用
 	CreateTime   *time.Time            `gorm:"column:create_time;autoCreateTime:true" json:"create_time"`
 	UpdateTime   *time.Time            `gorm:"column:update_time;autoUpdateTime:true" json:"update_time"`
-	DeleteTime   *time.Time            `gorm:"column:delete_time;autoDeleteTime:true" json:"delete_time"`
+	DeleteTime   *time.Time            `gorm:"column:delete_time" json:"delete_time"`
 	Remark       *string               `gorm:"column:remark" json:"remark"`
 	Roles        []Role                `gorm:"JoinReferences:RoleID;joinForeignKey:UserID;many2many:user_role" json:"roles"`
 	AppInstances []AppInstance         `gorm:"foreignKey:CreateUserID" json:"app_instances"`

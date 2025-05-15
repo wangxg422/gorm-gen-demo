@@ -15,16 +15,16 @@ const TableNameAppPackage = "app_package"
 // AppPackage mapped from table <app_package>
 type AppPackage struct {
 	ID             int64                 `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	PackageID      string                `gorm:"column:package_id;not null;comment:应用包id" json:"package_id"`                   // 应用包id
-	PackageName    string                `gorm:"column:package_name;not null;comment:应用包名称" json:"package_name"`               // 应用包名称
-	PackageLabel   string                `gorm:"column:package_label;not null;comment:应用包标签" json:"package_label"`             // 应用包标签
-	PackageVersion string                `gorm:"column:package_version;not null;comment:应用包版本" json:"package_version"`         // 应用包版本
-	CreateUserID   int64                 `gorm:"column:create_user_id;not null;comment:创建用户" json:"create_user_id"`            // 创建用户
-	Status         int32                 `gorm:"column:status;not null;comment:0可用1禁用" json:"status"`                          // 0可用1禁用
-	Valid          soft_delete.DeletedAt `gorm:"column:valid;not null;default:0;comment:0可用1已删除;softDelete:flag" json:"valid"` // 0可用1已删除
+	PackageID      string                `gorm:"column:package_id;not null;comment:应用包id" json:"package_id"`                         // 应用包id
+	PackageName    string                `gorm:"column:package_name;not null;comment:应用包名称" json:"package_name"`                     // 应用包名称
+	PackageLabel   string                `gorm:"column:package_label;not null;comment:应用包标签" json:"package_label"`                   // 应用包标签
+	PackageVersion string                `gorm:"column:package_version;not null;comment:应用包版本" json:"package_version"`               // 应用包版本
+	CreateUserID   int64                 `gorm:"column:create_user_id;not null;comment:创建用户" json:"create_user_id"`                  // 创建用户
+	Status         int32                 `gorm:"column:status;not null;comment:0可用1禁用" json:"status"`                                // 0可用1禁用
+	DelFlag        soft_delete.DeletedAt `gorm:"column:del_flag;not null;default:0;comment:0可用1已删除;softDelete:flag" json:"del_flag"` // 0可用1已删除
 	CreateTime     *time.Time            `gorm:"column:create_time;autoCreateTime:true" json:"create_time"`
 	UpdateTime     *time.Time            `gorm:"column:update_time;autoUpdateTime:true" json:"update_time"`
-	DeleteTime     *time.Time            `gorm:"column:delete_time;autoDeleteTime:true" json:"delete_time"`
+	DeleteTime     *time.Time            `gorm:"column:delete_time" json:"delete_time"`
 	Remark         *string               `gorm:"column:remark;comment:备注" json:"remark"` // 备注
 	AppInstance    []AppInstance         `gorm:"foreignKey:AppPackageID" json:"app_instance"`
 	CreateUser     User                  `gorm:"foreignKey:CreateUserID" json:"create_user"`

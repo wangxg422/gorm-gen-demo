@@ -31,7 +31,7 @@ func newRole(db *gorm.DB, opts ...gen.DOOption) role {
 	_role.ID = field.NewInt64(tableName, "id")
 	_role.RoleCode = field.NewString(tableName, "role_code")
 	_role.RoleName = field.NewString(tableName, "role_name")
-	_role.Valid = field.NewString(tableName, "valid")
+	_role.DelFlag = field.NewString(tableName, "del_flag")
 	_role.Status = field.NewInt32(tableName, "status")
 	_role.CreateTime = field.NewTime(tableName, "create_time")
 	_role.UpdateTime = field.NewTime(tableName, "update_time")
@@ -50,7 +50,7 @@ type role struct {
 	ID         field.Int64
 	RoleCode   field.String // 角色编码
 	RoleName   field.String // 角色名称
-	Valid      field.String // 0可用1已删除
+	DelFlag    field.String // 0可用1已删除
 	Status     field.Int32  // 0可用1停用
 	CreateTime field.Time
 	UpdateTime field.Time
@@ -75,7 +75,7 @@ func (r *role) updateTableName(table string) *role {
 	r.ID = field.NewInt64(table, "id")
 	r.RoleCode = field.NewString(table, "role_code")
 	r.RoleName = field.NewString(table, "role_name")
-	r.Valid = field.NewString(table, "valid")
+	r.DelFlag = field.NewString(table, "del_flag")
 	r.Status = field.NewInt32(table, "status")
 	r.CreateTime = field.NewTime(table, "create_time")
 	r.UpdateTime = field.NewTime(table, "update_time")
@@ -109,7 +109,7 @@ func (r *role) fillFieldMap() {
 	r.fieldMap["id"] = r.ID
 	r.fieldMap["role_code"] = r.RoleCode
 	r.fieldMap["role_name"] = r.RoleName
-	r.fieldMap["valid"] = r.Valid
+	r.fieldMap["del_flag"] = r.DelFlag
 	r.fieldMap["status"] = r.Status
 	r.fieldMap["create_time"] = r.CreateTime
 	r.fieldMap["update_time"] = r.UpdateTime
