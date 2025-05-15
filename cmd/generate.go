@@ -44,6 +44,7 @@ func main() {
 	// 定义 User 的关系
 	UserRelate := g.GenerateModelAs("user", "User",
 		mixin.AutoCreateTimeTag, mixin.AutoUpdateTimeTag, mixin.AutoDeleteTimeTag,
+		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.Many2Many, "Roles", Role, &field.RelateConfig{
 			GORMTag: field.GormTag{
 				"many2many":      []string{"user_role"},
@@ -66,6 +67,7 @@ func main() {
 	// 定义 Role 的关系
 	RoleRelate := g.GenerateModelAs("role", "Role",
 		mixin.AutoCreateTimeTag, mixin.AutoUpdateTimeTag, mixin.AutoDeleteTimeTag,
+		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.Many2Many, "Users", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
 				"many2many":      []string{"user_role"},
@@ -78,6 +80,7 @@ func main() {
 	// 定义 AppPackage 的关系
 	AppPackageRelate := g.GenerateModelAs("app_package", "AppPackage",
 		mixin.AutoCreateTimeTag, mixin.AutoUpdateTimeTag, mixin.AutoDeleteTimeTag,
+		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.HasMany, "AppInstance", AppInstance, &field.RelateConfig{
 			GORMTag: field.GormTag{
 				"foreignKey": []string{"AppPackageID"},
@@ -93,6 +96,7 @@ func main() {
 	// 定义 AppInstance 的关系
 	AppInstanceRelate := g.GenerateModelAs("app_instance", "AppInstance",
 		mixin.AutoCreateTimeTag, mixin.AutoUpdateTimeTag, mixin.AutoDeleteTimeTag,
+		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
 				"foreignKey": []string{"CreateUserID"},

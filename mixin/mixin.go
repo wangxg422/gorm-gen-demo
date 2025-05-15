@@ -34,7 +34,12 @@ var AutoDeleteTimeTag = gen.FieldGORMTag("delete_time", func(tag field.GormTag) 
 	return tag
 })
 
-// 软删除默认字段名为:`deleted_at`, 表字段数据类型为: DATETIME. 这里指定为`valid`,数据类型为char(1)
-var SoftDeleteTag = gen.FieldType("valid", "string")
+var SoftDeleteFlagTag = gen.FieldGORMTag("valid", func(tag field.GormTag) field.GormTag {
+	tag.Append("softDelete", "flag")
+	return tag
+})
 
-var CommonTag = []gen.ModelOpt{AutoCreateTimeTag, AutoUpdateTimeTag, AutoDeleteTimeTag}
+// 软删除默认字段名为:`deleted_at`, 表字段数据类型为: DATETIME. 这里指定为`valid`,数据类型为char(1)
+var SoftDeleteFieldType = gen.FieldType("valid", "soft_delete.DeletedAt")
+
+//var CommonTag = []gen.ModelOpt{AutoCreateTimeTag, AutoUpdateTimeTag, AutoDeleteTimeTag}
