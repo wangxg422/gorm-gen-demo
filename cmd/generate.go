@@ -54,12 +54,12 @@ func main() {
 		}),
 		gen.FieldRelate(field.HasMany, "AppInstances", AppInstance, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.JoinForeignKeyLabel: []string{"CreateUserID"},
+				mixin.ForeignKeyLabel: []string{"CreateUserID"},
 			},
 		}),
 		gen.FieldRelate(field.HasMany, "AppPackages", AppPackage, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.JoinForeignKeyLabel: []string{"CreateUserID"},
+				mixin.ForeignKeyLabel: []string{"CreateUserID"},
 			},
 		}),
 	)
@@ -83,12 +83,12 @@ func main() {
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.HasMany, "AppInstance", AppInstance, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.JoinForeignKeyLabel: []string{"AppPackageID"},
+				mixin.ForeignKeyLabel: []string{"AppPackageID"},
 			},
 		}),
 		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.JoinForeignKeyLabel: []string{"CreateUserID"},
+				mixin.ForeignKeyLabel: []string{"CreateUserID"},
 			},
 		}),
 	)
@@ -99,12 +99,12 @@ func main() {
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.JoinForeignKeyLabel: []string{"CreateUserID"},
+				mixin.ForeignKeyLabel: []string{"CreateUserID"},
 			},
 		}),
 		gen.FieldRelate(field.BelongsTo, "AppPackage", AppPackage, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.JoinForeignKeyLabel: []string{"AppPackageID"},
+				mixin.ForeignKeyLabel: []string{"AppPackageID"},
 			},
 		}),
 	)

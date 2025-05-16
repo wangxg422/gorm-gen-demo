@@ -12,17 +12,19 @@ const (
 	AutoUpdateTimeLabel = "autoUpdateTime"
 	AutoDeleteTimeLabel = "autoDeleteTime"
 	SoftDeleteLabel     = "softDelete"
-	DelflagLabel = "del_flag"
-	CreateTimeLabel = "create_time"
-	UpdateTimeLabel = "update_time"
-	DeleteTimeLabel = "delete_time"
-	M2MLabel = "many2many"
+	DelflagLabel        = "del_flag"
+	CreateTimeLabel     = "create_time"
+	UpdateTimeLabel     = "update_time"
+	DeleteTimeLabel     = "delete_time"
+	M2MLabel            = "many2many"
+	ForeignKeyLabel      = "foreignKey"
+	ReferencesLabel     = "References"
 	JoinForeignKeyLabel = "joinForeignKey"
 	JoinReferencesLabel = "joinReferences"
-	JoinForeignKey = "foreignKey"
 )
 
 // 自定义模型结体字段的标签
+//
 //	将特定字段名的 json 标签加上`string`属性,即 MarshalJSON 时该字段由数字类型转成字符串类型
 var jsonField = gen.FieldJSONTagWithNS(func(columnName string) (tagContent string) {
 	toStringField := `balance, `

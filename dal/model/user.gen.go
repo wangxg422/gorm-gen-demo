@@ -25,8 +25,8 @@ type User struct {
 	DeleteTime   *time.Time            `gorm:"column:delete_time" json:"delete_time"`
 	Remark       *string               `gorm:"column:remark" json:"remark"`
 	Roles        []Role                `gorm:"joinForeignKey:UserID;joinReferences:RoleID;many2many:user_role" json:"roles"`
-	AppInstances []AppInstance         `gorm:"joinForeignKey:CreateUserID" json:"app_instances"`
-	AppPackages  []AppPackage          `gorm:"joinForeignKey:CreateUserID" json:"app_packages"`
+	AppInstances []AppInstance         `gorm:"foreignKey:CreateUserID" json:"app_instances"`
+	AppPackages  []AppPackage          `gorm:"foreignKey:CreateUserID" json:"app_packages"`
 }
 
 // TableName User's table name
