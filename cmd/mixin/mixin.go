@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	PrimaryKeyLabel = "primaryKey"
 	AutoCreateTimeLabel = "autoCreateTime"
 	AutoUpdateTimeLabel = "autoUpdateTime"
 	AutoDeleteTimeLabel = "autoDeleteTime"

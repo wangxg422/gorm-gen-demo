@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"context"
+	"fmt"
 	"gorm-gen-demo/client"
 	"gorm-gen-demo/dal/model"
 	"gorm-gen-demo/dal/query"
@@ -11,38 +13,96 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUserCRUD(t *testing.T) {
+var zore int64 = 0
+var one int64 = 1
+
+func genUsername() string {
+	return strconv.FormatInt(time.Now().UnixMilli(), 10)
+}
+
+func TestUserCreate(t *testing.T) {
 	query.SetDefault(client.ConnectDB().Debug())
 
-	username := "u" + strconv.FormatInt(time.Now().UnixMilli(), 13)
-	user := model.User {
+	username := genUsername()
+
+	user := model.User{
 		UserName: username,
 		Password: "123456",
-		Status: 1,
+		Status:   0,
 	}
 
-	err := CreateUser(&user)
+	err := CreateUser(context.Background(), &user)
 	assert.NoError(t, err)
-	assert.Equal(t, username, user)
-	assert.Greater(t, user.ID, 0)
+	assert.Greater(t, user.ID, zore)
+}
 
-	FindUser, err := GetUserByUserID(user.ID)
+func TestUserRead(t *testing.T) {
+	query.SetDefault(client.ConnectDB().Debug())
+
+	username := genUsername()
+
+	user := model.User{
+		UserName: username,
+		Password: "123456",
+		Status:   0,
+	}
+
+	err := CreateUser(context.Background(), &user)
+	assert.NoError(t, err)
+
+	FindUser, err := GetUserByUserID(context.Background(), user.ID)
 	assert.NoError(t, err)
 	assert.Equal(t, username, FindUser.UserName)
+}
 
-	newUser := model.User {
-		UserName: "new_" + username,
+func TestUserUpdate(t *testing.T) {
+	query.SetDefault(client.ConnectDB().Debug())
+
+	username := genUsername()
+
+	user := model.User{
+		UserName: username,
+		Password: "123456",
+		Status:   0,
 	}
 
-	var one int64 = 1
+	err := CreateUser(context.Background(), &user)
+	assert.NoError(t, err)
 
-	r, err := UpdateUser(&newUser)
+	newUser := model.User{
+		ID:       user.ID,
+		UserName: "new_" + username,
+		Password: "123456",
+		Status:   0,
+	}
+
+	r, err := UpdateUser(context.Background(), &newUser)
+	assert.NoError(t, err)
+	assert.Equal(t, one, r.RowsAffected)
+	assert.NoError(t, r.Error)
+}
+
+func TestUserDelete(t *testing.T) {
+	query.SetDefault(client.ConnectDB().Debug())
+
+	username := genUsername()
+
+	user := model.User{
+		UserName: username,
+		Password: "123456",
+		Status:   0,
+	}
+
+	err := CreateUser(context.Background(), &user)
+	assert.NoError(t, err)
+
+	r, err := DeleteUser(context.Background(), user.ID)
 	assert.NoError(t, err)
 	assert.Equal(t, one, r.RowsAffected)
 	assert.NoError(t, r.Error)
 
-	r, err = DeleteUser(user.ID)
-	assert.NoError(t, err)
-	assert.Equal(t, one, r.RowsAffected)
-	assert.NoError(t, r.Error)
+	GetUser, err := GetUserByUserID(context.Background(), user.ID)
+	fmt.Println(err)
+	assert.Error(t, err)
+	assert.Nil(t, GetUser)
 }
