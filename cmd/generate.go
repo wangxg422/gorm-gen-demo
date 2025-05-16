@@ -2,7 +2,7 @@ package main
 
 import (
 	"gorm-gen-demo/client"
-	"gorm-gen-demo/mixin"
+	"gorm-gen-demo/cmd/mixin"
 
 	"gorm.io/gen"
 	"gorm.io/gen/field"

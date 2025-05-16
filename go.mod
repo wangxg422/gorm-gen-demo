@@ -8,6 +8,7 @@ require (
 	gorm.io/gen v0.3.27
 	gorm.io/gorm v1.26.1
 	gorm.io/plugin/dbresolver v1.6.0
+	gorm.io/plugin/soft_delete v1.2.1
 )
 
 require (
@@ -25,5 +26,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/datatypes v1.2.5 // indirect
 	gorm.io/hints v1.1.2 // indirect
-	gorm.io/plugin/soft_delete v1.2.1 // indirect
 )
