@@ -47,19 +47,19 @@ func main() {
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.Many2Many, "Roles", Role, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"many2many":      []string{"user_role"},
-				"joinForeignKey": []string{"UserID"},
-				"JoinReferences": []string{"RoleID"},
+				mixin.M2MLabel:      []string{"user_role"},
+				mixin.JoinForeignKeyLabel: []string{"UserID"},
+				mixin.JoinReferencesLabel: []string{"RoleID"},
 			},
 		}),
 		gen.FieldRelate(field.HasMany, "AppInstances", AppInstance, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"CreateUserID"},
+				mixin.JoinForeignKeyLabel: []string{"CreateUserID"},
 			},
 		}),
 		gen.FieldRelate(field.HasMany, "AppPackages", AppPackage, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"CreateUserID"},
+				mixin.JoinForeignKeyLabel: []string{"CreateUserID"},
 			},
 		}),
 	)
@@ -70,9 +70,9 @@ func main() {
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.Many2Many, "Users", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"many2many":      []string{"user_role"},
-				"joinForeignKey": []string{"RoleID"},
-				"JoinReferences": []string{"UserID"},
+				mixin.M2MLabel:      []string{"user_role"},
+				mixin.JoinForeignKeyLabel: []string{"RoleID"},
+				mixin.JoinReferencesLabel: []string{"UserID"},
 			},
 		}),
 	)
@@ -83,12 +83,12 @@ func main() {
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.HasMany, "AppInstance", AppInstance, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"AppPackageID"},
+				mixin.JoinForeignKeyLabel: []string{"AppPackageID"},
 			},
 		}),
 		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"CreateUserID"},
+				mixin.JoinForeignKeyLabel: []string{"CreateUserID"},
 			},
 		}),
 	)
@@ -99,12 +99,12 @@ func main() {
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
 		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"CreateUserID"},
+				mixin.JoinForeignKeyLabel: []string{"CreateUserID"},
 			},
 		}),
 		gen.FieldRelate(field.BelongsTo, "AppPackage", AppPackage, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				"foreignKey": []string{"AppPackageID"},
+				mixin.JoinForeignKeyLabel: []string{"AppPackageID"},
 			},
 		}),
 	)

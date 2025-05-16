@@ -16,6 +16,10 @@ const (
 	CreateTimeLabel = "create_time"
 	UpdateTimeLabel = "update_time"
 	DeleteTimeLabel = "delete_time"
+	M2MLabel = "many2many"
+	JoinForeignKeyLabel = "joinForeignKey"
+	JoinReferencesLabel = "joinReferences"
+	JoinForeignKey = "foreignKey"
 )
 
 // 自定义模型结体字段的标签

@@ -23,7 +23,7 @@ type Role struct {
 	UpdateTime *time.Time            `gorm:"column:update_time;autoUpdateTime:true" json:"update_time"`
 	DeleteTime *time.Time            `gorm:"column:delete_time" json:"delete_time"`
 	Remark     *string               `gorm:"column:remark" json:"remark"`
-	Users      []User                `gorm:"JoinReferences:UserID;joinForeignKey:RoleID;many2many:user_role" json:"users"`
+	Users      []User                `gorm:"joinForeignKey:RoleID;joinReferences:UserID;many2many:user_role" json:"users"`
 }
 
 // TableName Role's table name

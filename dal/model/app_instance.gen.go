@@ -26,8 +26,8 @@ type AppInstance struct {
 	UpdateTime   *time.Time            `gorm:"column:update_time;autoUpdateTime:true" json:"update_time"`
 	DeleteTime   *time.Time            `gorm:"column:delete_time" json:"delete_time"`
 	Remark       *string               `gorm:"column:remark;comment:备注" json:"remark"` // 备注
-	CreateUser   User                  `gorm:"foreignKey:CreateUserID" json:"create_user"`
-	AppPackage   AppPackage            `gorm:"foreignKey:AppPackageID" json:"app_package"`
+	CreateUser   User                  `gorm:"joinForeignKey:CreateUserID" json:"create_user"`
+	AppPackage   AppPackage            `gorm:"joinForeignKey:AppPackageID" json:"app_package"`
 }
 
 // TableName AppInstance's table name

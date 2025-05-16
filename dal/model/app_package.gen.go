@@ -26,8 +26,8 @@ type AppPackage struct {
 	UpdateTime     *time.Time            `gorm:"column:update_time;autoUpdateTime:true" json:"update_time"`
 	DeleteTime     *time.Time            `gorm:"column:delete_time" json:"delete_time"`
 	Remark         *string               `gorm:"column:remark;comment:备注" json:"remark"` // 备注
-	AppInstance    []AppInstance         `gorm:"foreignKey:AppPackageID" json:"app_instance"`
-	CreateUser     User                  `gorm:"foreignKey:CreateUserID" json:"create_user"`
+	AppInstance    []AppInstance         `gorm:"joinForeignKey:AppPackageID" json:"app_instance"`
+	CreateUser     User                  `gorm:"joinForeignKey:CreateUserID" json:"create_user"`
 }
 
 // TableName AppPackage's table name
