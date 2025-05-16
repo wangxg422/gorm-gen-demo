@@ -36,9 +36,6 @@ func main() {
 	Role := g.GenerateModel("role")
 	User := g.GenerateModel("user")
 
-	// 这里需要先生成模型，在定义完关系后在生成模型会被覆盖
-	g.ApplyBasic(g.GenerateAllTable()...)
-
 	// 使用 ApplyBasic 后，单独追加关联（使用 ApplyInterface 或 GenerateModel 的补充模式）
 
 	// 定义 User 的关系
@@ -112,6 +109,7 @@ func main() {
 	// Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`
 	//g.ApplyInterface(func(Querier){}, model.User{}, model.Company{})
 	g.ApplyBasic(UserRelate, RoleRelate, AppPackageRelate, AppInstanceRelate)
+	//g.ApplyBasic(g.GenerateAllTable()...)
 
 	// Generate the code
 	g.Execute()

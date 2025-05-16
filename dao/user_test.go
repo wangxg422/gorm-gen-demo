@@ -106,3 +106,11 @@ func TestUserDelete(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, GetUser)
 }
+
+func TestGetRolesByUserId(t *testing.T) {
+	query.SetDefault(client.ConnectDB().Debug())
+
+	GetRolesByUserId(context.Background(), 1)
+	//assert.NotErrorIs().Error(t, err,)
+}
+

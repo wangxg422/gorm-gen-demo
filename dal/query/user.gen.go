@@ -32,12 +32,29 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.UserName = field.NewString(tableName, "user_name")
 	_user.RealName = field.NewString(tableName, "real_name")
 	_user.Password = field.NewString(tableName, "password")
-	_user.DelFlag = field.NewString(tableName, "del_flag")
+	_user.DelFlag = field.NewField(tableName, "del_flag")
 	_user.Status = field.NewInt32(tableName, "status")
 	_user.CreateTime = field.NewTime(tableName, "create_time")
 	_user.UpdateTime = field.NewTime(tableName, "update_time")
 	_user.DeleteTime = field.NewTime(tableName, "delete_time")
 	_user.Remark = field.NewString(tableName, "remark")
+	_user.Roles = userManyToManyRoles{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Roles", "model.Role"),
+	}
+
+	_user.AppInstances = userHasManyAppInstances{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("AppInstances", "model.AppInstance"),
+	}
+
+	_user.AppPackages = userHasManyAppPackages{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("AppPackages", "model.AppPackage"),
+	}
 
 	_user.fillFieldMap()
 
@@ -52,12 +69,17 @@ type user struct {
 	UserName   field.String // 用户名
 	RealName   field.String // 姓名
 	Password   field.String // 密码
-	DelFlag    field.String // 0可用1已删除
+	DelFlag    field.Field  // 0可用1已删除
 	Status     field.Int32  // 0正常1停用
 	CreateTime field.Time
 	UpdateTime field.Time
 	DeleteTime field.Time
 	Remark     field.String
+	Roles      userManyToManyRoles
+
+	AppInstances userHasManyAppInstances
+
+	AppPackages userHasManyAppPackages
 
 	fieldMap map[string]field.Expr
 }
@@ -78,7 +100,7 @@ func (u *user) updateTableName(table string) *user {
 	u.UserName = field.NewString(table, "user_name")
 	u.RealName = field.NewString(table, "real_name")
 	u.Password = field.NewString(table, "password")
-	u.DelFlag = field.NewString(table, "del_flag")
+	u.DelFlag = field.NewField(table, "del_flag")
 	u.Status = field.NewInt32(table, "status")
 	u.CreateTime = field.NewTime(table, "create_time")
 	u.UpdateTime = field.NewTime(table, "update_time")
@@ -108,7 +130,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 10)
+	u.fieldMap = make(map[string]field.Expr, 13)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["user_name"] = u.UserName
 	u.fieldMap["real_name"] = u.RealName
@@ -119,16 +141,269 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["update_time"] = u.UpdateTime
 	u.fieldMap["delete_time"] = u.DeleteTime
 	u.fieldMap["remark"] = u.Remark
+
 }
 
 func (u user) clone(db *gorm.DB) user {
 	u.userDo.ReplaceConnPool(db.Statement.ConnPool)
+	u.Roles.db = db.Session(&gorm.Session{Initialized: true})
+	u.Roles.db.Statement.ConnPool = db.Statement.ConnPool
+	u.AppInstances.db = db.Session(&gorm.Session{Initialized: true})
+	u.AppInstances.db.Statement.ConnPool = db.Statement.ConnPool
+	u.AppPackages.db = db.Session(&gorm.Session{Initialized: true})
+	u.AppPackages.db.Statement.ConnPool = db.Statement.ConnPool
 	return u
 }
 
 func (u user) replaceDB(db *gorm.DB) user {
 	u.userDo.ReplaceDB(db)
+	u.Roles.db = db.Session(&gorm.Session{})
+	u.AppInstances.db = db.Session(&gorm.Session{})
+	u.AppPackages.db = db.Session(&gorm.Session{})
 	return u
+}
+
+type userManyToManyRoles struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a userManyToManyRoles) Where(conds ...field.Expr) *userManyToManyRoles {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a userManyToManyRoles) WithContext(ctx context.Context) *userManyToManyRoles {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a userManyToManyRoles) Session(session *gorm.Session) *userManyToManyRoles {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a userManyToManyRoles) Model(m *model.User) *userManyToManyRolesTx {
+	return &userManyToManyRolesTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a userManyToManyRoles) Unscoped() *userManyToManyRoles {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type userManyToManyRolesTx struct{ tx *gorm.Association }
+
+func (a userManyToManyRolesTx) Find() (result []*model.Role, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a userManyToManyRolesTx) Append(values ...*model.Role) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a userManyToManyRolesTx) Replace(values ...*model.Role) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a userManyToManyRolesTx) Delete(values ...*model.Role) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a userManyToManyRolesTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a userManyToManyRolesTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a userManyToManyRolesTx) Unscoped() *userManyToManyRolesTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type userHasManyAppInstances struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a userHasManyAppInstances) Where(conds ...field.Expr) *userHasManyAppInstances {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a userHasManyAppInstances) WithContext(ctx context.Context) *userHasManyAppInstances {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a userHasManyAppInstances) Session(session *gorm.Session) *userHasManyAppInstances {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a userHasManyAppInstances) Model(m *model.User) *userHasManyAppInstancesTx {
+	return &userHasManyAppInstancesTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a userHasManyAppInstances) Unscoped() *userHasManyAppInstances {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type userHasManyAppInstancesTx struct{ tx *gorm.Association }
+
+func (a userHasManyAppInstancesTx) Find() (result []*model.AppInstance, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a userHasManyAppInstancesTx) Append(values ...*model.AppInstance) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a userHasManyAppInstancesTx) Replace(values ...*model.AppInstance) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a userHasManyAppInstancesTx) Delete(values ...*model.AppInstance) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a userHasManyAppInstancesTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a userHasManyAppInstancesTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a userHasManyAppInstancesTx) Unscoped() *userHasManyAppInstancesTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type userHasManyAppPackages struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a userHasManyAppPackages) Where(conds ...field.Expr) *userHasManyAppPackages {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a userHasManyAppPackages) WithContext(ctx context.Context) *userHasManyAppPackages {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a userHasManyAppPackages) Session(session *gorm.Session) *userHasManyAppPackages {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a userHasManyAppPackages) Model(m *model.User) *userHasManyAppPackagesTx {
+	return &userHasManyAppPackagesTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a userHasManyAppPackages) Unscoped() *userHasManyAppPackages {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type userHasManyAppPackagesTx struct{ tx *gorm.Association }
+
+func (a userHasManyAppPackagesTx) Find() (result []*model.AppPackage, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a userHasManyAppPackagesTx) Append(values ...*model.AppPackage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a userHasManyAppPackagesTx) Replace(values ...*model.AppPackage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a userHasManyAppPackagesTx) Delete(values ...*model.AppPackage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a userHasManyAppPackagesTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a userHasManyAppPackagesTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a userHasManyAppPackagesTx) Unscoped() *userHasManyAppPackagesTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type userDo struct{ gen.DO }

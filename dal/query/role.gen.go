@@ -31,12 +31,17 @@ func newRole(db *gorm.DB, opts ...gen.DOOption) role {
 	_role.ID = field.NewInt64(tableName, "id")
 	_role.RoleCode = field.NewString(tableName, "role_code")
 	_role.RoleName = field.NewString(tableName, "role_name")
-	_role.DelFlag = field.NewString(tableName, "del_flag")
+	_role.DelFlag = field.NewField(tableName, "del_flag")
 	_role.Status = field.NewInt32(tableName, "status")
 	_role.CreateTime = field.NewTime(tableName, "create_time")
 	_role.UpdateTime = field.NewTime(tableName, "update_time")
 	_role.DeleteTime = field.NewTime(tableName, "delete_time")
 	_role.Remark = field.NewString(tableName, "remark")
+	_role.Users = roleManyToManyUsers{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Users", "model.User"),
+	}
 
 	_role.fillFieldMap()
 
@@ -50,12 +55,13 @@ type role struct {
 	ID         field.Int64
 	RoleCode   field.String // 角色编码
 	RoleName   field.String // 角色名称
-	DelFlag    field.String // 0可用1已删除
+	DelFlag    field.Field  // 0可用1已删除
 	Status     field.Int32  // 0可用1停用
 	CreateTime field.Time
 	UpdateTime field.Time
 	DeleteTime field.Time
 	Remark     field.String
+	Users      roleManyToManyUsers
 
 	fieldMap map[string]field.Expr
 }
@@ -75,7 +81,7 @@ func (r *role) updateTableName(table string) *role {
 	r.ID = field.NewInt64(table, "id")
 	r.RoleCode = field.NewString(table, "role_code")
 	r.RoleName = field.NewString(table, "role_name")
-	r.DelFlag = field.NewString(table, "del_flag")
+	r.DelFlag = field.NewField(table, "del_flag")
 	r.Status = field.NewInt32(table, "status")
 	r.CreateTime = field.NewTime(table, "create_time")
 	r.UpdateTime = field.NewTime(table, "update_time")
@@ -105,7 +111,7 @@ func (r *role) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (r *role) fillFieldMap() {
-	r.fieldMap = make(map[string]field.Expr, 9)
+	r.fieldMap = make(map[string]field.Expr, 10)
 	r.fieldMap["id"] = r.ID
 	r.fieldMap["role_code"] = r.RoleCode
 	r.fieldMap["role_name"] = r.RoleName
@@ -115,16 +121,101 @@ func (r *role) fillFieldMap() {
 	r.fieldMap["update_time"] = r.UpdateTime
 	r.fieldMap["delete_time"] = r.DeleteTime
 	r.fieldMap["remark"] = r.Remark
+
 }
 
 func (r role) clone(db *gorm.DB) role {
 	r.roleDo.ReplaceConnPool(db.Statement.ConnPool)
+	r.Users.db = db.Session(&gorm.Session{Initialized: true})
+	r.Users.db.Statement.ConnPool = db.Statement.ConnPool
 	return r
 }
 
 func (r role) replaceDB(db *gorm.DB) role {
 	r.roleDo.ReplaceDB(db)
+	r.Users.db = db.Session(&gorm.Session{})
 	return r
+}
+
+type roleManyToManyUsers struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a roleManyToManyUsers) Where(conds ...field.Expr) *roleManyToManyUsers {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a roleManyToManyUsers) WithContext(ctx context.Context) *roleManyToManyUsers {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a roleManyToManyUsers) Session(session *gorm.Session) *roleManyToManyUsers {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a roleManyToManyUsers) Model(m *model.Role) *roleManyToManyUsersTx {
+	return &roleManyToManyUsersTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a roleManyToManyUsers) Unscoped() *roleManyToManyUsers {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type roleManyToManyUsersTx struct{ tx *gorm.Association }
+
+func (a roleManyToManyUsersTx) Find() (result []*model.User, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a roleManyToManyUsersTx) Append(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a roleManyToManyUsersTx) Replace(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a roleManyToManyUsersTx) Delete(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a roleManyToManyUsersTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a roleManyToManyUsersTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a roleManyToManyUsersTx) Unscoped() *roleManyToManyUsersTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type roleDo struct{ gen.DO }

@@ -35,11 +35,22 @@ func newAppPackage(db *gorm.DB, opts ...gen.DOOption) appPackage {
 	_appPackage.PackageVersion = field.NewString(tableName, "package_version")
 	_appPackage.CreateUserID = field.NewInt64(tableName, "create_user_id")
 	_appPackage.Status = field.NewInt32(tableName, "status")
-	_appPackage.DelFlag = field.NewString(tableName, "del_flag")
+	_appPackage.DelFlag = field.NewField(tableName, "del_flag")
 	_appPackage.CreateTime = field.NewTime(tableName, "create_time")
 	_appPackage.UpdateTime = field.NewTime(tableName, "update_time")
 	_appPackage.DeleteTime = field.NewTime(tableName, "delete_time")
 	_appPackage.Remark = field.NewString(tableName, "remark")
+	_appPackage.AppInstance = appPackageHasManyAppInstance{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("AppInstance", "model.AppInstance"),
+	}
+
+	_appPackage.CreateUser = appPackageBelongsToCreateUser{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("CreateUser", "model.User"),
+	}
 
 	_appPackage.fillFieldMap()
 
@@ -57,11 +68,14 @@ type appPackage struct {
 	PackageVersion field.String // 应用包版本
 	CreateUserID   field.Int64  // 创建用户
 	Status         field.Int32  // 0可用1禁用
-	DelFlag        field.String // 0可用1已删除
+	DelFlag        field.Field  // 0可用1已删除
 	CreateTime     field.Time
 	UpdateTime     field.Time
 	DeleteTime     field.Time
 	Remark         field.String // 备注
+	AppInstance    appPackageHasManyAppInstance
+
+	CreateUser appPackageBelongsToCreateUser
 
 	fieldMap map[string]field.Expr
 }
@@ -85,7 +99,7 @@ func (a *appPackage) updateTableName(table string) *appPackage {
 	a.PackageVersion = field.NewString(table, "package_version")
 	a.CreateUserID = field.NewInt64(table, "create_user_id")
 	a.Status = field.NewInt32(table, "status")
-	a.DelFlag = field.NewString(table, "del_flag")
+	a.DelFlag = field.NewField(table, "del_flag")
 	a.CreateTime = field.NewTime(table, "create_time")
 	a.UpdateTime = field.NewTime(table, "update_time")
 	a.DeleteTime = field.NewTime(table, "delete_time")
@@ -116,7 +130,7 @@ func (a *appPackage) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *appPackage) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 12)
+	a.fieldMap = make(map[string]field.Expr, 14)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["package_id"] = a.PackageID
 	a.fieldMap["package_name"] = a.PackageName
@@ -129,16 +143,185 @@ func (a *appPackage) fillFieldMap() {
 	a.fieldMap["update_time"] = a.UpdateTime
 	a.fieldMap["delete_time"] = a.DeleteTime
 	a.fieldMap["remark"] = a.Remark
+
 }
 
 func (a appPackage) clone(db *gorm.DB) appPackage {
 	a.appPackageDo.ReplaceConnPool(db.Statement.ConnPool)
+	a.AppInstance.db = db.Session(&gorm.Session{Initialized: true})
+	a.AppInstance.db.Statement.ConnPool = db.Statement.ConnPool
+	a.CreateUser.db = db.Session(&gorm.Session{Initialized: true})
+	a.CreateUser.db.Statement.ConnPool = db.Statement.ConnPool
 	return a
 }
 
 func (a appPackage) replaceDB(db *gorm.DB) appPackage {
 	a.appPackageDo.ReplaceDB(db)
+	a.AppInstance.db = db.Session(&gorm.Session{})
+	a.CreateUser.db = db.Session(&gorm.Session{})
 	return a
+}
+
+type appPackageHasManyAppInstance struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a appPackageHasManyAppInstance) Where(conds ...field.Expr) *appPackageHasManyAppInstance {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a appPackageHasManyAppInstance) WithContext(ctx context.Context) *appPackageHasManyAppInstance {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a appPackageHasManyAppInstance) Session(session *gorm.Session) *appPackageHasManyAppInstance {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a appPackageHasManyAppInstance) Model(m *model.AppPackage) *appPackageHasManyAppInstanceTx {
+	return &appPackageHasManyAppInstanceTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a appPackageHasManyAppInstance) Unscoped() *appPackageHasManyAppInstance {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type appPackageHasManyAppInstanceTx struct{ tx *gorm.Association }
+
+func (a appPackageHasManyAppInstanceTx) Find() (result []*model.AppInstance, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a appPackageHasManyAppInstanceTx) Append(values ...*model.AppInstance) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a appPackageHasManyAppInstanceTx) Replace(values ...*model.AppInstance) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a appPackageHasManyAppInstanceTx) Delete(values ...*model.AppInstance) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a appPackageHasManyAppInstanceTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a appPackageHasManyAppInstanceTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a appPackageHasManyAppInstanceTx) Unscoped() *appPackageHasManyAppInstanceTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type appPackageBelongsToCreateUser struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a appPackageBelongsToCreateUser) Where(conds ...field.Expr) *appPackageBelongsToCreateUser {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a appPackageBelongsToCreateUser) WithContext(ctx context.Context) *appPackageBelongsToCreateUser {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a appPackageBelongsToCreateUser) Session(session *gorm.Session) *appPackageBelongsToCreateUser {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a appPackageBelongsToCreateUser) Model(m *model.AppPackage) *appPackageBelongsToCreateUserTx {
+	return &appPackageBelongsToCreateUserTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a appPackageBelongsToCreateUser) Unscoped() *appPackageBelongsToCreateUser {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type appPackageBelongsToCreateUserTx struct{ tx *gorm.Association }
+
+func (a appPackageBelongsToCreateUserTx) Find() (result *model.User, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a appPackageBelongsToCreateUserTx) Append(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a appPackageBelongsToCreateUserTx) Replace(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a appPackageBelongsToCreateUserTx) Delete(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a appPackageBelongsToCreateUserTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a appPackageBelongsToCreateUserTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a appPackageBelongsToCreateUserTx) Unscoped() *appPackageBelongsToCreateUserTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type appPackageDo struct{ gen.DO }

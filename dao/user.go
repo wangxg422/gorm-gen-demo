@@ -27,3 +27,11 @@ func GetUserByUserID(ctx context.Context, id int64) (*model.User, error) {
 	}
 	return user, nil
 }
+
+func GetRolesByUserId(ctx context.Context, id int64) ([]model.Role, error) {
+	user, err := query.User.WithContext(ctx).Preload(query.User.Roles).Where(query.User.ID.Eq(id)).First()
+	if err != nil {
+		return nil, err
+	}
+	return user.Roles, nil
+}

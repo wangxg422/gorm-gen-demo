@@ -35,11 +35,22 @@ func newAppInstance(db *gorm.DB, opts ...gen.DOOption) appInstance {
 	_appInstance.CreateUserID = field.NewInt64(tableName, "create_user_id")
 	_appInstance.Desc = field.NewString(tableName, "desc")
 	_appInstance.Status = field.NewInt32(tableName, "status")
-	_appInstance.DelFlag = field.NewString(tableName, "del_flag")
+	_appInstance.DelFlag = field.NewField(tableName, "del_flag")
 	_appInstance.CreateTime = field.NewTime(tableName, "create_time")
 	_appInstance.UpdateTime = field.NewTime(tableName, "update_time")
 	_appInstance.DeleteTime = field.NewTime(tableName, "delete_time")
 	_appInstance.Remark = field.NewString(tableName, "remark")
+	_appInstance.CreateUser = appInstanceBelongsToCreateUser{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("CreateUser", "model.User"),
+	}
+
+	_appInstance.AppPackage = appInstanceBelongsToAppPackage{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("AppPackage", "model.AppPackage"),
+	}
 
 	_appInstance.fillFieldMap()
 
@@ -57,11 +68,14 @@ type appInstance struct {
 	CreateUserID field.Int64  // 创建用户
 	Desc         field.String // app描述
 	Status       field.Int32  // 0正常1停止
-	DelFlag      field.String // 0可用1已删除
+	DelFlag      field.Field  // 0可用1已删除
 	CreateTime   field.Time
 	UpdateTime   field.Time
 	DeleteTime   field.Time
 	Remark       field.String // 备注
+	CreateUser   appInstanceBelongsToCreateUser
+
+	AppPackage appInstanceBelongsToAppPackage
 
 	fieldMap map[string]field.Expr
 }
@@ -85,7 +99,7 @@ func (a *appInstance) updateTableName(table string) *appInstance {
 	a.CreateUserID = field.NewInt64(table, "create_user_id")
 	a.Desc = field.NewString(table, "desc")
 	a.Status = field.NewInt32(table, "status")
-	a.DelFlag = field.NewString(table, "del_flag")
+	a.DelFlag = field.NewField(table, "del_flag")
 	a.CreateTime = field.NewTime(table, "create_time")
 	a.UpdateTime = field.NewTime(table, "update_time")
 	a.DeleteTime = field.NewTime(table, "delete_time")
@@ -116,7 +130,7 @@ func (a *appInstance) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *appInstance) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 12)
+	a.fieldMap = make(map[string]field.Expr, 14)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["app_id"] = a.AppID
 	a.fieldMap["app_package_id"] = a.AppPackageID
@@ -129,16 +143,185 @@ func (a *appInstance) fillFieldMap() {
 	a.fieldMap["update_time"] = a.UpdateTime
 	a.fieldMap["delete_time"] = a.DeleteTime
 	a.fieldMap["remark"] = a.Remark
+
 }
 
 func (a appInstance) clone(db *gorm.DB) appInstance {
 	a.appInstanceDo.ReplaceConnPool(db.Statement.ConnPool)
+	a.CreateUser.db = db.Session(&gorm.Session{Initialized: true})
+	a.CreateUser.db.Statement.ConnPool = db.Statement.ConnPool
+	a.AppPackage.db = db.Session(&gorm.Session{Initialized: true})
+	a.AppPackage.db.Statement.ConnPool = db.Statement.ConnPool
 	return a
 }
 
 func (a appInstance) replaceDB(db *gorm.DB) appInstance {
 	a.appInstanceDo.ReplaceDB(db)
+	a.CreateUser.db = db.Session(&gorm.Session{})
+	a.AppPackage.db = db.Session(&gorm.Session{})
 	return a
+}
+
+type appInstanceBelongsToCreateUser struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a appInstanceBelongsToCreateUser) Where(conds ...field.Expr) *appInstanceBelongsToCreateUser {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a appInstanceBelongsToCreateUser) WithContext(ctx context.Context) *appInstanceBelongsToCreateUser {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a appInstanceBelongsToCreateUser) Session(session *gorm.Session) *appInstanceBelongsToCreateUser {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a appInstanceBelongsToCreateUser) Model(m *model.AppInstance) *appInstanceBelongsToCreateUserTx {
+	return &appInstanceBelongsToCreateUserTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a appInstanceBelongsToCreateUser) Unscoped() *appInstanceBelongsToCreateUser {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type appInstanceBelongsToCreateUserTx struct{ tx *gorm.Association }
+
+func (a appInstanceBelongsToCreateUserTx) Find() (result *model.User, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a appInstanceBelongsToCreateUserTx) Append(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a appInstanceBelongsToCreateUserTx) Replace(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a appInstanceBelongsToCreateUserTx) Delete(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a appInstanceBelongsToCreateUserTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a appInstanceBelongsToCreateUserTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a appInstanceBelongsToCreateUserTx) Unscoped() *appInstanceBelongsToCreateUserTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type appInstanceBelongsToAppPackage struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a appInstanceBelongsToAppPackage) Where(conds ...field.Expr) *appInstanceBelongsToAppPackage {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a appInstanceBelongsToAppPackage) WithContext(ctx context.Context) *appInstanceBelongsToAppPackage {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a appInstanceBelongsToAppPackage) Session(session *gorm.Session) *appInstanceBelongsToAppPackage {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a appInstanceBelongsToAppPackage) Model(m *model.AppInstance) *appInstanceBelongsToAppPackageTx {
+	return &appInstanceBelongsToAppPackageTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a appInstanceBelongsToAppPackage) Unscoped() *appInstanceBelongsToAppPackage {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type appInstanceBelongsToAppPackageTx struct{ tx *gorm.Association }
+
+func (a appInstanceBelongsToAppPackageTx) Find() (result *model.AppPackage, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a appInstanceBelongsToAppPackageTx) Append(values ...*model.AppPackage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a appInstanceBelongsToAppPackageTx) Replace(values ...*model.AppPackage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a appInstanceBelongsToAppPackageTx) Delete(values ...*model.AppPackage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a appInstanceBelongsToAppPackageTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a appInstanceBelongsToAppPackageTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a appInstanceBelongsToAppPackageTx) Unscoped() *appInstanceBelongsToAppPackageTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type appInstanceDo struct{ gen.DO }
