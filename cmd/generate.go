@@ -1,11 +1,14 @@
 package main
 
 import (
-	"gorm-gen-demo/client"
+	"flag"
+	"fmt"
 	"gorm-gen-demo/cmd/mixin"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
+	"gorm.io/gorm"
 )
 
 // Dynamic SQL
@@ -15,6 +18,21 @@ type Querier interface {
 }
 
 func main() {
+	var (
+		username string
+		password string
+		addr     string
+		port     string
+		database string
+	)
+
+	flag.StringVar(&username, "u", "root", "username")
+	flag.StringVar(&password, "p", "123456", "password")
+	flag.StringVar(&addr, "a", "127.0.0.1", "address")
+	flag.StringVar(&port, "P", "3306", "port")
+	flag.StringVar(&database, "d", "gorm-gen-demo", "database")
+	flag.Parse()
+	
 	g := gen.NewGenerator(gen.Config{
 		OutPath: "../dal/query",
 
@@ -27,88 +45,69 @@ func main() {
 		FieldNullable: true, // generate pointer when field is nullable
 	})
 
-	//gormdb, _ := gorm.Open(mysql.Open("root:passowrd@(127.0.0.1:3306)/gorm_gen?charset=utf8mb4&parseTime=True&loc=Local"))
-	g.UseDB(client.ConnectDB()) // reuse your gorm db
+	gormdb, _ := gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, addr, port, database)))
+	g.UseDB(gormdb) // reuse your gorm db
 
 	// 先定义模型的基础结构，只生成基础字段，不处理关系，确保模型都先存在，避免定义关系时循环引用冲突
-	AppPackage := g.GenerateModel("app_package")
-	AppInstance := g.GenerateModel("app_instance")
-	Role := g.GenerateModel("role")
-	User := g.GenerateModel("user")
+	SysUser := g.GenerateModel("sys_user")
+	SysRole := g.GenerateModel("sys_role")
+	SysDept := g.GenerateModel("sys_dept")
 
 	// 使用 ApplyBasic 后，单独追加关联（使用 ApplyInterface 或 GenerateModel 的补充模式）
 
-	// 定义 User 的关系
-	UserRelate := g.GenerateModelAs("user", "User",
+	// 定义 SysUser 的关系
+	SysUserRelate := g.GenerateModelAs("sys_user", "SysUser",
 		mixin.AutoCreateTimeTag, mixin.AutoUpdateTimeTag,
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
-		gen.FieldRelate(field.Many2Many, "Roles", Role, &field.RelateConfig{
+		// M2M: SysUser - SysRole
+		gen.FieldRelate(field.Many2Many, "SysRoleList", SysRole, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.M2MLabel:      []string{"user_role"},
+				mixin.M2MLabel:            []string{"sys_user_role"},
 				mixin.JoinForeignKeyLabel: []string{"UserID"},
 				mixin.JoinReferencesLabel: []string{"RoleID"},
 			},
 		}),
-		gen.FieldRelate(field.HasMany, "AppInstances", AppInstance, &field.RelateConfig{
+		// M2O: SysUser - SysDept
+		gen.FieldRelate(field.BelongsTo, "BelongToSysDept", SysDept, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.ForeignKeyLabel: []string{"CreateUserID"},
+				mixin.ForeignKeyLabel: []string{"ID"},
+				mixin.ReferencesLabel: []string{"DeptID"},
 			},
-		}),
-		gen.FieldRelate(field.HasMany, "AppPackages", AppPackage, &field.RelateConfig{
-			GORMTag: field.GormTag{
-				mixin.ForeignKeyLabel: []string{"CreateUserID"},
-			},
+			RelatePointer: true,
 		}),
 	)
 
-	// 定义 Role 的关系
-	RoleRelate := g.GenerateModelAs("role", "Role",
+	// 定义 SysRole 的关系
+	SysRoleRelate := g.GenerateModelAs("sys_role", "SysRole",
 		mixin.AutoCreateTimeTag, mixin.AutoUpdateTimeTag,
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
-		gen.FieldRelate(field.Many2Many, "Users", User, &field.RelateConfig{
+		// M2M: SysRole - SysUser
+		gen.FieldRelate(field.Many2Many, "SysUserList", SysUser, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.M2MLabel:      []string{"user_role"},
+				mixin.M2MLabel:            []string{"sys_user_role"},
 				mixin.JoinForeignKeyLabel: []string{"RoleID"},
 				mixin.JoinReferencesLabel: []string{"UserID"},
 			},
 		}),
 	)
 
-	// 定义 AppPackage 的关系
-	AppPackageRelate := g.GenerateModelAs("app_package", "AppPackage",
+	// 定义 SysDept 的关系
+	SysDeptRelate := g.GenerateModelAs("sys_dept", "SysDept",
 		mixin.AutoCreateTimeTag, mixin.AutoUpdateTimeTag,
 		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
-		gen.FieldRelate(field.HasMany, "AppInstance", AppInstance, &field.RelateConfig{
+		// O2M: SysDept - SysUser
+		gen.FieldRelate(field.HasMany, "SysUserList", SysUser, &field.RelateConfig{
 			GORMTag: field.GormTag{
-				mixin.ForeignKeyLabel: []string{"AppPackageID"},
+				mixin.ForeignKeyLabel: []string{"ID"},
+				mixin.ReferencesLabel: []string{"ID"},
 			},
-		}),
-		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
-			GORMTag: field.GormTag{
-				mixin.ForeignKeyLabel: []string{"CreateUserID"},
-			},
-		}),
-	)
-
-	// 定义 AppInstance 的关系
-	AppInstanceRelate := g.GenerateModelAs("app_instance", "AppInstance",
-		mixin.AutoCreateTimeTag, mixin.AutoUpdateTimeTag,
-		mixin.SoftDeleteFieldType, mixin.SoftDeleteFlagTag,
-		gen.FieldRelate(field.BelongsTo, "CreateUser", User, &field.RelateConfig{
-			GORMTag: field.GormTag{
-				mixin.ForeignKeyLabel: []string{"CreateUserID"},
-			},
-		}),
-		gen.FieldRelate(field.BelongsTo, "AppPackage", AppPackage, &field.RelateConfig{
-			GORMTag: field.GormTag{
-				mixin.ForeignKeyLabel: []string{"AppPackageID"},
-			},
+			RelateSlicePointer: true,
 		}),
 	)
 
 	// Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`
 	//g.ApplyInterface(func(Querier){}, model.User{}, model.Company{})
-	g.ApplyBasic(UserRelate, RoleRelate, AppPackageRelate, AppInstanceRelate)
+	g.ApplyBasic(SysUserRelate, SysRoleRelate, SysDeptRelate)
 	//g.ApplyBasic(g.GenerateAllTable()...)
 
 	// Generate the code

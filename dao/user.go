@@ -8,30 +8,30 @@ import (
 	"gorm.io/gen"
 )
 
-func CreateUser(ctx context.Context, user *model.User) error {
-	return query.User.WithContext(ctx).Create(user);
+func CreateUser(ctx context.Context, user *model.SysUser) error {
+	return query.SysUser.WithContext(ctx).Create(user);
 }
 
-func UpdateUser(ctx context.Context, user *model.User) (gen.ResultInfo, error) {
-	return query.User.WithContext(ctx).Where(query.User.ID.Eq(user.ID)).Updates(user);
+func UpdateUser(ctx context.Context, user *model.SysUser) (gen.ResultInfo, error) {
+	return query.SysUser.WithContext(ctx).Where(query.SysUser.ID.Eq(user.ID)).Updates(user);
 }
 
 func DeleteUser(ctx context.Context, id int64) (gen.ResultInfo, error) {
-	return query.User.WithContext(ctx).Where(query.User.ID.Eq(id)).Delete();
+	return query.SysUser.WithContext(ctx).Where(query.SysUser.ID.Eq(id)).Delete();
 }
 
-func GetUserByUserID(ctx context.Context, id int64) (*model.User, error) {
-	user, err := query.User.WithContext(ctx).Where(query.User.ID.Eq(id)).First()
+func GetUserByUserID(ctx context.Context, id int64) (*model.SysUser, error) {
+	user, err := query.SysUser.WithContext(ctx).Where(query.SysUser.ID.Eq(id)).First()
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func GetRolesByUserId(ctx context.Context, id int64) ([]model.Role, error) {
-	user, err := query.User.WithContext(ctx).Preload(query.User.Roles).Where(query.User.ID.Eq(id)).First()
+func GetRolesByUserId(ctx context.Context, id int64) ([]model.SysRole, error) {
+	user, err := query.SysUser.WithContext(ctx).Preload(query.SysUser.SysRoleList).Where(query.SysUser.ID.Eq(id)).First()
 	if err != nil {
 		return nil, err
 	}
-	return user.Roles, nil
+	return user.SysRoleList, nil
 }

@@ -16,49 +16,44 @@ import (
 )
 
 var (
-	Q           = new(Query)
-	AppInstance *appInstance
-	AppPackage  *appPackage
-	Role        *role
-	User        *user
+	Q       = new(Query)
+	SysDept *sysDept
+	SysRole *sysRole
+	SysUser *sysUser
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
-	AppInstance = &Q.AppInstance
-	AppPackage = &Q.AppPackage
-	Role = &Q.Role
-	User = &Q.User
+	SysDept = &Q.SysDept
+	SysRole = &Q.SysRole
+	SysUser = &Q.SysUser
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:          db,
-		AppInstance: newAppInstance(db, opts...),
-		AppPackage:  newAppPackage(db, opts...),
-		Role:        newRole(db, opts...),
-		User:        newUser(db, opts...),
+		db:      db,
+		SysDept: newSysDept(db, opts...),
+		SysRole: newSysRole(db, opts...),
+		SysUser: newSysUser(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	AppInstance appInstance
-	AppPackage  appPackage
-	Role        role
-	User        user
+	SysDept sysDept
+	SysRole sysRole
+	SysUser sysUser
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:          db,
-		AppInstance: q.AppInstance.clone(db),
-		AppPackage:  q.AppPackage.clone(db),
-		Role:        q.Role.clone(db),
-		User:        q.User.clone(db),
+		db:      db,
+		SysDept: q.SysDept.clone(db),
+		SysRole: q.SysRole.clone(db),
+		SysUser: q.SysUser.clone(db),
 	}
 }
 
@@ -72,27 +67,24 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:          db,
-		AppInstance: q.AppInstance.replaceDB(db),
-		AppPackage:  q.AppPackage.replaceDB(db),
-		Role:        q.Role.replaceDB(db),
-		User:        q.User.replaceDB(db),
+		db:      db,
+		SysDept: q.SysDept.replaceDB(db),
+		SysRole: q.SysRole.replaceDB(db),
+		SysUser: q.SysUser.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	AppInstance IAppInstanceDo
-	AppPackage  IAppPackageDo
-	Role        IRoleDo
-	User        IUserDo
+	SysDept ISysDeptDo
+	SysRole ISysRoleDo
+	SysUser ISysUserDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		AppInstance: q.AppInstance.WithContext(ctx),
-		AppPackage:  q.AppPackage.WithContext(ctx),
-		Role:        q.Role.WithContext(ctx),
-		User:        q.User.WithContext(ctx),
+		SysDept: q.SysDept.WithContext(ctx),
+		SysRole: q.SysRole.WithContext(ctx),
+		SysUser: q.SysUser.WithContext(ctx),
 	}
 }
 

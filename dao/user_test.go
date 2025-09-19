@@ -25,7 +25,7 @@ func TestUserCreate(t *testing.T) {
 
 	username := genUsername()
 
-	user := model.User{
+	user := model.SysUser{
 		UserName: username,
 		Password: "123456",
 		Status:   0,
@@ -41,7 +41,7 @@ func TestUserRead(t *testing.T) {
 
 	username := genUsername()
 
-	user := model.User{
+	user := model.SysUser{
 		UserName: username,
 		Password: "123456",
 		Status:   0,
@@ -60,7 +60,7 @@ func TestUserUpdate(t *testing.T) {
 
 	username := genUsername()
 
-	user := model.User{
+	user := model.SysUser{
 		UserName: username,
 		Password: "123456",
 		Status:   0,
@@ -69,7 +69,7 @@ func TestUserUpdate(t *testing.T) {
 	err := CreateUser(context.Background(), &user)
 	assert.NoError(t, err)
 
-	newUser := model.User{
+	newUser := model.SysUser{
 		ID:       user.ID,
 		UserName: "new_" + username,
 		Password: "123456",
@@ -87,7 +87,7 @@ func TestUserDelete(t *testing.T) {
 
 	username := genUsername()
 
-	user := model.User{
+	user := model.SysUser{
 		UserName: username,
 		Password: "123456",
 		Status:   0,

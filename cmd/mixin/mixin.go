@@ -13,7 +13,7 @@ const (
 	AutoUpdateTimeLabel = "autoUpdateTime"
 	AutoDeleteTimeLabel = "autoDeleteTime"
 	SoftDeleteLabel     = "softDelete"
-	DelflagLabel        = "del_flag"
+	DelFlagLabel        = "del_flag"
 	CreateTimeLabel     = "create_time"
 	UpdateTimeLabel     = "update_time"
 	DeleteTimeLabel     = "delete_time"
@@ -52,12 +52,12 @@ var AutoUpdateTimeTag = gen.FieldGORMTag(UpdateTimeLabel, func(tag field.GormTag
 // 	return tag
 // })
 
-var SoftDeleteFlagTag = gen.FieldGORMTag(DelflagLabel, func(tag field.GormTag) field.GormTag {
+var SoftDeleteFlagTag = gen.FieldGORMTag(DelFlagLabel, func(tag field.GormTag) field.GormTag {
 	tag.Append(SoftDeleteLabel, "flag")
 	return tag
 })
 
-// 软删除默认字段名为:`deleted_at`, 表字段数据类型为: DATETIME. 这里指定为`valid`,数据类型为char(1)
-var SoftDeleteFieldType = gen.FieldType(DelflagLabel, "soft_delete.DeletedAt")
+// 软删除默认字段名为:`deleted_at`, 表字段数据类型为: DATETIME. 这里指定为`del_flag`,数据类型为tinyint
+var SoftDeleteFieldType = gen.FieldType(DelFlagLabel, "soft_delete.DeletedAt")
 
 //var CommonTag = []gen.ModelOpt{AutoCreateTimeTag, AutoUpdateTimeTag, AutoDeleteTimeTag}
