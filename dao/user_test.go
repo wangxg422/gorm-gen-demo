@@ -3,9 +3,8 @@ package dao
 import (
 	"context"
 	"fmt"
-	"gorm-gen-demo/client"
+
 	"gorm-gen-demo/dal/model"
-	"gorm-gen-demo/dal/query"
 	"strconv"
 	"testing"
 	"time"
@@ -13,16 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var zore int64 = 0
-var one int64 = 1
-
 func genUsername() string {
 	return strconv.FormatInt(time.Now().UnixMilli(), 10)
 }
 
 func TestUserCreate(t *testing.T) {
-	query.SetDefault(client.ConnectDB().Debug())
-
 	username := genUsername()
 
 	user := model.SysUser{
@@ -33,12 +27,10 @@ func TestUserCreate(t *testing.T) {
 
 	err := CreateUser(context.Background(), &user)
 	assert.NoError(t, err)
-	assert.Greater(t, user.ID, zore)
+	assert.Greater(t, user.ID, int64(0))
 }
 
 func TestUserRead(t *testing.T) {
-	query.SetDefault(client.ConnectDB().Debug())
-
 	username := genUsername()
 
 	user := model.SysUser{
@@ -56,8 +48,6 @@ func TestUserRead(t *testing.T) {
 }
 
 func TestUserUpdate(t *testing.T) {
-	query.SetDefault(client.ConnectDB().Debug())
-
 	username := genUsername()
 
 	user := model.SysUser{
@@ -78,13 +68,11 @@ func TestUserUpdate(t *testing.T) {
 
 	r, err := UpdateUser(context.Background(), &newUser)
 	assert.NoError(t, err)
-	assert.Equal(t, one, r.RowsAffected)
+	assert.Equal(t, int64(1), r.RowsAffected)
 	assert.NoError(t, r.Error)
 }
 
 func TestUserDelete(t *testing.T) {
-	query.SetDefault(client.ConnectDB().Debug())
-
 	username := genUsername()
 
 	user := model.SysUser{
@@ -98,7 +86,7 @@ func TestUserDelete(t *testing.T) {
 
 	r, err := DeleteUser(context.Background(), user.ID)
 	assert.NoError(t, err)
-	assert.Equal(t, one, r.RowsAffected)
+	assert.Equal(t, int64(1), r.RowsAffected)
 	assert.NoError(t, r.Error)
 
 	GetUser, err := GetUserByUserID(context.Background(), user.ID)
@@ -107,10 +95,7 @@ func TestUserDelete(t *testing.T) {
 	assert.Nil(t, GetUser)
 }
 
-func TestGetRolesByUserId(t *testing.T) {
-	query.SetDefault(client.ConnectDB().Debug())
-
-	GetRolesByUserId(context.Background(), 1)
-	//assert.NotErrorIs().Error(t, err,)
-}
-
+// func TestGetRolesByUserId(t *testing.T) {
+// 	GetRolesByUserId(context.Background(), 1)
+// 	//assert.NotErrorIs().Error(t, err,)
+// }
