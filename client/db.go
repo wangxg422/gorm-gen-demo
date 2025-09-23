@@ -10,7 +10,7 @@ import (
 
 var DB *gorm.DB
 
-func ConnectDB() *gorm.DB {
+func NewClient() *gorm.DB {
 	var (
 		username string
 		password string

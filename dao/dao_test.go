@@ -9,7 +9,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	client.DB = client.ConnectDB().Debug()
+	client.DB = client.NewClient().Debug()
 	// 注册数据权限插件
 	client.DB.Use(&plugin.DataScopePlugin{})
 
